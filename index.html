@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>СКК ПАО «НЛМК» — Система контроля качества металлопродукции</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+/* ========== THEME VARIABLES ========== */
+:root{
+  --accent:#3498DB;--accent-dark:#2980B9;--accent-glow:rgba(52,152,219,.2);
+  --green:#27AE60;--green-light:#2ecc71;--yellow:#F39C12;--red:#E74C3C;
+  --dark-red:#C0392B;
+  --radius:8px;--radius-lg:12px;--nav-h:56px;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:"Consolas","Courier New",Courier,monospace;
+  --transition:.2s ease;
+}
+
+/* DARK THEME (default) */
+[data-theme="dark"]{
+  --bg:#0f1419;--bg-secondary:#1a1f2e;--card:#1e2538;--card-hover:#252d42;
+  --text:#e1e4e8;--text-light:#8b95a5;--text-muted:#5a6577;
+  --nav:#141926;--nav-dark:#0d1117;
+  --border:#2d3548;--border-light:#252d3f;
+  --shadow:0 2px 12px rgba(0,0,0,.3);--shadow-lg:0 8px 32px rgba(0,0,0,.4);
+  --input-bg:#161b28;--hover-bg:rgba(52,152,219,.06);
+  --table-header:#1a2030;--table-stripe:rgba(255,255,255,.02);--table-hover:rgba(52,152,219,.05);
+  --modal-bg:#1e2538;--modal-overlay:rgba(0,0,0,.7);
+  --scrollbar-track:#1a1f2e;--scrollbar-thumb:#2d3548;
+}
+
+/* LIGHT THEME */
+[data-theme="light"]{
+  --bg:#f0f2f5;--bg-secondary:#e8ebef;--card:#ffffff;--card-hover:#f8f9fb;
+  --text:#1a1a2e;--text-light:#6b7280;--text-muted:#9ca3af;
+  --nav:#1e2538;--nav-dark:#141926;
+  --border:#d1d5db;--border-light:#e5e7eb;
+  --shadow:0 2px 12px rgba(0,0,0,.06);--shadow-lg:0 8px 32px rgba(0,0,0,.1);
+  --input-bg:#ffffff;--hover-bg:rgba(52,152,219,.04);
+  --table-header:#f3f4f6;--table-stripe:rgba(0,0,0,.02);--table-hover:rgba(52,152,219,.04);
+  --modal-bg:#ffffff;--modal-overlay:rgba(0,0,0,.5);
+  --scrollbar-track:#e5e7eb;--scrollbar-thumb:#9ca3af;
+}
+
+/* ACCENT COLOR SCHEMES */
+[data-accent="blue"]{--accent:#3498DB;--accent-dark:#2980B9;--accent-glow:rgba(52,152,219,.2)}
+[data-accent="teal"]{--accent:#00b894;--accent-dark:#00a381;--accent-glow:rgba(0,184,148,.2)}
+[data-accent="purple"]{--accent:#6c5ce7;--accent-dark:#5a4bd1;--accent-glow:rgba(108,92,231,.2)}
+[data-accent="orange"]{--accent:#e17055;--accent-dark:#d35400;--accent-glow:rgba(225,112,85,.2)}
+[data-accent="emerald"]{--accent:#00b16a;--accent-dark:#009a5b;--accent-glow:rgba(0,177,106,.2)}
+
+html{font-size:14px;line-height:1.6;font-family:var(--font);-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--scrollbar-track)}
+::-webkit-scrollbar-thumb{background:var(--scrollbar-thumb);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+
+a{color:var(--accent);text-decoration:none;transition:var(--transition)}
+a:hover{color:var(--accent-dark);text-decoration:underline}
+
+button{cursor:pointer;font:inherit;border:none;border-radius:var(--radius);padding:9px 18px;transition:all var(--transition);font-weight:600;letter-spacing:.2px;font-size:13px}
+input,select,textarea{font:inherit;border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;width:100%;transition:all var(--transition);background:var(--input-bg);color:var(--text)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+input.error,select.error,textarea.error{border-color:var(--red);box-shadow:0 0 0 3px rgba(231,76,60,.15)}
+label{display:block;font-size:11px;color:var(--text-light);margin-bottom:5px;font-weight:700;text-transform:uppercase;letter-spacing:.8px}
+select option{background:var(--card);color:var(--text)}
+
+table{width:100%;border-collapse:separate;border-spacing:0}
+th,td{text-align:left;padding:11px 14px}
+th{background:var(--table-header);font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-light);font-weight:700;cursor:pointer;user-select:none;white-space:nowrap;border-bottom:2px solid var(--border);position:sticky;top:0;z-index:1}
+th:hover{color:var(--accent)}
+td{border-bottom:1px solid var(--border-light);font-size:13px}
+tr:hover td{background:var(--table-hover)}
+tr:nth-child(even) td{background:var(--table-stripe)}
+tr:nth-child(even):hover td{background:var(--table-hover)}
+.mono{font-family:var(--mono);font-size:13px}
+
+.btn-primary{background:var(--accent);color:#fff;box-shadow:0 2px 8px var(--accent-glow)}
+.btn-primary:hover{background:var(--accent-dark);box-shadow:0 4px 16px var(--accent-glow);transform:translateY(-1px)}
+.btn-secondary{background:transparent;color:var(--accent);border:1.5px solid var(--border)}
+.btn-secondary:hover{border-color:var(--accent);background:var(--hover-bg);transform:translateY(-1px)}
+.btn-danger{background:var(--red);color:#fff;box-shadow:0 2px 8px rgba(231,76,60,.2)}
+.btn-danger:hover{background:var(--dark-red);transform:translateY(-1px)}
+.btn-success{background:var(--green);color:#fff;box-shadow:0 2px 8px rgba(39,174,96,.2)}
+.btn-success:hover{background:#219A52;transform:translateY(-1px)}
+.btn-sm{padding:6px 13px;font-size:12px}
+.btn-xs{padding:4px 10px;font-size:11px}
+.btn-icon{display:inline-flex;align-items:center;gap:6px}
+button:disabled{opacity:.4;pointer-events:none;transform:none!important}
+button:active{transform:translateY(0)!important}
+
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+.badge-green{background:rgba(39,174,96,.15);color:#2ecc71}
+.badge-yellow{background:rgba(243,156,18,.15);color:#f1c40f}
+.badge-red{background:rgba(231,76,60,.15);color:#e74c3c}
+.badge-blue{background:var(--accent-glow);color:var(--accent)}
+.badge-gray{background:rgba(128,128,128,.15);color:#999}
+.badge-dark-red{background:rgba(192,57,43,.15);color:#e74c3c}
+
+.card{background:var(--card);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:22px;margin-bottom:18px;border:1px solid var(--border);transition:background .3s,border .3s}
+.card:hover{border-color:var(--border)}
+.card-title{font-size:15px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:10px;color:var(--text)}
+.card-title .card-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.card-title .card-icon svg{width:16px;height:16px}
+
+/* ========== SVG ICON HELPERS ========== */
+.ic{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.ic svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ic-lg svg{width:20px;height:20px}
+.ic-xl svg{width:24px;height:24px}
+
+/* ========== NAV ========== */
+#navbar{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:var(--nav);display:flex;align-items:center;padding:0 24px;z-index:1000;box-shadow:0 1px 0 var(--border);border-bottom:1px solid var(--border)}
+#navbar .logo{color:var(--text);font-size:15px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:10px;white-space:nowrap;letter-spacing:.2px}
+#navbar .logo-icon{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#navbar .logo-icon svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2.5}
+#navbar .logo-text{color:#fff}
+#navbar .logo-text span{display:block;font-size:9px;font-weight:400;opacity:.5;letter-spacing:1px;text-transform:uppercase;margin-top:1px}
+#nav-links{display:flex;gap:1px;margin-left:28px;flex:1}
+#nav-links .nav-item{color:var(--text-muted);padding:8px 14px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;position:relative;display:flex;align-items:center;gap:7px}
+#nav-links .nav-item svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;opacity:.7}
+#nav-links .nav-item:hover{color:var(--text);background:rgba(255,255,255,.05)}
+#nav-links .nav-item.active{color:var(--accent);background:var(--accent-glow)}
+#nav-user{color:var(--text);display:flex;align-items:center;gap:12px;margin-left:auto;white-space:nowrap}
+#nav-user .user-avatar{width:32px;height:32px;border-radius:8px;background:var(--accent-glow);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:1px solid var(--border)}
+#nav-user .user-info{text-align:right}
+#nav-user .user-name{font-size:13px;font-weight:600;color:#fff}
+#nav-user .user-role{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
+#btn-logout{background:rgba(231,76,60,.1);color:var(--red);font-size:12px;padding:6px 14px;border:1px solid rgba(231,76,60,.2);display:flex;align-items:center;gap:5px}
+#btn-logout svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+#btn-logout:hover{background:rgba(231,76,60,.2)}
+#hamburger{display:none;background:none;color:var(--text);font-size:20px;padding:6px 10px;border-radius:var(--radius)}
+#hamburger:hover{background:rgba(255,255,255,.06)}
+
+#app-container{display:none;padding-top:calc(var(--nav-h) + 20px);max-width:1300px;margin:0 auto;padding-left:24px;padding-right:24px;padding-bottom:60px}
+.section{display:none;animation:fadeIn .2s ease}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px}
+.page-header h1{font-size:20px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:10px}
+.page-header h1 .ic{color:var(--accent)}
+.page-header .page-subtitle{font-size:12px;color:var(--text-light);margin-top:2px;font-weight:400}
+
+/* ========== LOGIN ========== */
+#login-page{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg);position:relative;overflow:hidden}
+#login-page::before{content:'';position:absolute;width:500px;height:500px;border-radius:50%;background:var(--accent-glow);top:-200px;right:-100px;filter:blur(80px)}
+#login-page::after{content:'';position:absolute;width:300px;height:300px;border-radius:50%;background:var(--accent-glow);bottom:-100px;left:-50px;filter:blur(60px)}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:40px 36px;width:400px;max-width:92vw;box-shadow:var(--shadow-lg);position:relative;z-index:1}
+.login-card .login-logo{text-align:center;margin-bottom:28px}
+.login-card .login-logo .logo-mark{width:56px;height:56px;border-radius:14px;background:var(--accent);display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px;box-shadow:0 8px 24px var(--accent-glow)}
+.login-card .login-logo .logo-mark svg{width:28px;height:28px;stroke:#fff;fill:none;stroke-width:2.5}
+.login-card .login-logo h2{font-size:16px;color:var(--text);font-weight:800}
+.login-card .login-logo p{font-size:12px;color:var(--text-light);margin-top:4px}
+.login-card .input-icon{position:relative}
+.login-card .input-icon svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+.login-card .input-icon input{padding-left:40px;height:44px;font-size:14px}
+.login-card .form-group{margin-bottom:18px}
+.login-error{background:rgba(231,76,60,.1);color:var(--red);padding:10px 14px;border-radius:var(--radius);font-size:12px;margin-bottom:14px;display:none;border:1px solid rgba(231,76,60,.2);font-weight:500}
+.login-card button[type=submit]{width:100%;padding:12px;font-size:14px;font-weight:700;height:46px}
+.login-card .login-footer{text-align:center;margin-top:16px;font-size:12px;color:var(--text-light)}
+.login-card .login-hint{margin-top:20px;padding:14px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);font-size:11px;color:var(--text-light);line-height:1.8}
+.login-card .login-hint strong{color:var(--text);font-weight:600}
+
+/* ========== DASHBOARD ========== */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.stat-card{text-align:center;padding:18px 14px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat-card.sc-blue::before{background:var(--accent)}
+.stat-card.sc-red::before{background:var(--red)}
+.stat-card.sc-green::before{background:var(--green)}
+.stat-card.sc-yellow::before{background:var(--yellow)}
+.stat-card .stat-icon{width:40px;height:40px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:8px}
+.stat-card .stat-icon svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2}
+.stat-card.sc-blue .stat-icon{background:var(--accent-glow);color:var(--accent)}
+.stat-card.sc-red .stat-icon{background:rgba(231,76,60,.12);color:var(--red)}
+.stat-card.sc-green .stat-icon{background:rgba(39,174,96,.12);color:var(--green)}
+.stat-card.sc-yellow .stat-icon{background:rgba(243,156,18,.12);color:var(--yellow)}
+.stat-card .stat-num{font-size:28px;font-weight:800;line-height:1.1}
+.stat-card.sc-blue .stat-num{color:var(--accent)}
+.stat-card.sc-red .stat-num{color:var(--red)}
+.stat-card.sc-green .stat-num{color:var(--green)}
+.stat-card.sc-yellow .stat-num{color:var(--yellow)}
+.stat-card .stat-label{font-size:10px;color:var(--text-light);text-transform:uppercase;margin-top:5px;letter-spacing:.5px;font-weight:600}
+
+.status-panel{padding:20px;display:flex;gap:24px;flex-wrap:wrap;align-items:center;position:relative;overflow:hidden}
+.status-panel::before{content:'';position:absolute;top:0;left:0;bottom:0;width:4px}
+.status-panel.status-running::before{background:var(--green)}
+.status-panel.status-stopped::before{background:var(--yellow)}
+.status-panel.status-error::before{background:var(--red)}
+.status-panel.status-maintenance::before{background:var(--accent)}
+.status-item{flex:1;min-width:140px;padding-left:14px}
+.status-item .status-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;font-weight:700}
+.status-item .status-value{font-size:20px;font-weight:800;margin-top:3px;font-family:var(--mono);color:var(--text)}
+.status-indicator{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:7px;vertical-align:middle;flex-shrink:0}
+.indicator-green{background:var(--green);box-shadow:0 0 10px rgba(39,174,96,.5)}
+.indicator-yellow{background:var(--yellow);box-shadow:0 0 10px rgba(243,156,18,.5)}
+.indicator-red{background:var(--red);box-shadow:0 0 10px rgba(231,76,60,.5);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+.alert-item{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:var(--radius);margin-bottom:6px;border-left:3px solid;transition:.15s}
+.alert-item:hover{transform:translateX(2px)}
+.alert-item.alert-warning{border-color:var(--yellow);background:rgba(243,156,18,.05)}
+.alert-item.alert-critical{border-color:var(--red);background:rgba(231,76,60,.05)}
+.alert-item.alert-info{border-color:var(--accent);background:var(--hover-bg)}
+.alert-item .alert-text{flex:1;font-size:12px;line-height:1.5}
+.alert-item .alert-text strong{display:block;margin-bottom:2px;font-size:12px;color:var(--text)}
+.alert-item .alert-time{font-size:10px;color:var(--text-muted);white-space:nowrap}
+.alert-item .alert-btn{font-size:11px;padding:3px 8px;margin-top:4px}
+.event-mini{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--border-light);cursor:pointer;transition:all .15s;border-radius:4px}
+.event-mini:hover{background:var(--table-hover);transform:translateX(2px)}
+.event-mini:last-child{border-bottom:none}
+.empty-state{text-align:center;padding:32px 20px;color:var(--text-muted)}
+.empty-state .empty-icon{margin-bottom:10px;display:flex;justify-content:center;opacity:.4}
+.empty-state .empty-icon svg{width:36px;height:36px;stroke:currentColor;fill:none;stroke-width:1.5}
+.empty-state p{font-size:13px}
+
+/* FILTERS */
+.filters-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.filters-row .form-group{flex:1;min-width:140px}
+.filters-row .form-group.btn-group{display:flex;gap:8px;align-items:flex-end;min-width:auto;flex:0}
+.info-bar{display:flex;justify-content:space-between;align-items:center;margin:14px 0;font-size:13px;color:var(--text-light)}
+.info-bar .export-btns{display:flex;gap:6px;flex-wrap:wrap}
+.table-wrapper{overflow-x:auto;border-radius:var(--radius)}
+
+/* PAGINATION */
+.pagination{display:flex;align-items:center;justify-content:center;gap:3px;margin-top:18px;flex-wrap:wrap}
+.pagination button{padding:6px 12px;font-size:12px;background:var(--card);border:1px solid var(--border);color:var(--text-light);font-weight:600}
+.pagination button:hover:not(:disabled){background:var(--hover-bg);border-color:var(--accent);color:var(--accent)}
+.pagination button.active{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 2px 8px var(--accent-glow)}
+.pagination .page-info{font-size:12px;color:var(--text-muted);margin:0 8px;font-weight:500}
+
+/* PASSPORT */
+.search-big{position:relative;max-width:500px;margin-bottom:18px}
+.search-big input{padding:14px 20px 14px 44px;font-size:15px;border-radius:var(--radius-lg);border:2px solid var(--border);height:52px}
+.search-big input:focus{border-color:var(--accent)}
+.search-big .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-muted)}
+.search-big .search-icon svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+.autocomplete-list{position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:0 0 var(--radius) var(--radius);max-height:220px;overflow-y:auto;z-index:100;display:none;box-shadow:var(--shadow-lg)}
+.autocomplete-list .ac-item{padding:10px 16px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border-light);transition:.1s}
+.autocomplete-list .ac-item:hover{background:var(--table-hover)}
+.autocomplete-list .ac-item:last-child{border-bottom:none}
+.passport-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.passport-field{padding:10px 0}
+.passport-field .pf-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;font-weight:700}
+.passport-field .pf-value{font-size:16px;font-weight:700;margin-top:3px;color:var(--text)}
+.gallery{display:flex;gap:10px;overflow-x:auto;padding:8px 0}
+.gallery img{width:130px;height:100px;object-fit:cover;border-radius:var(--radius);cursor:pointer;border:2px solid var(--border);transition:all .2s}
+.gallery img:hover{border-color:var(--accent);transform:scale(1.04);box-shadow:0 4px 12px rgba(0,0,0,.2)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:var(--modal-overlay);z-index:2000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--modal-bg);border:1px solid var(--border);border-radius:16px;width:560px;max-width:92vw;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.4);animation:modalIn .2s ease}
+@keyframes modalIn{from{transform:scale(.94) translateY(16px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.modal-header{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid var(--border)}
+.modal-header h3{font-size:16px;font-weight:700;color:var(--text)}
+.modal-close{background:none;font-size:18px;color:var(--text-muted);padding:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:6px}
+.modal-close:hover{background:var(--hover-bg);color:var(--text)}
+.modal-body{padding:24px}
+.modal-body .form-group{margin-bottom:18px}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;padding:16px 24px;border-top:1px solid var(--border);background:var(--bg-secondary);border-radius:0 0 16px 16px}
+.field-error{color:var(--red);font-size:11px;margin-top:4px;display:none;font-weight:500}
+
+/* LIGHTBOX */
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:3000;display:none;align-items:center;justify-content:center}
+.lightbox.open{display:flex}
+.lightbox img{max-width:90vw;max-height:80vh;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.5)}
+.lightbox .lb-close{position:absolute;top:16px;right:20px;color:#fff;font-size:24px;background:rgba(255,255,255,.1);padding:6px;border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center}
+.lightbox .lb-close:hover{background:rgba(255,255,255,.2)}
+.lightbox .lb-nav{position:absolute;top:50%;transform:translateY(-50%);color:#fff;font-size:28px;background:rgba(255,255,255,.08);padding:10px 14px;border-radius:8px}
+.lightbox .lb-nav:hover{background:rgba(255,255,255,.15)}
+.lightbox .lb-prev{left:16px}
+.lightbox .lb-next{right:16px}
+.lightbox .lb-caption{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:#fff;font-size:12px;background:rgba(0,0,0,.7);padding:8px 20px;border-radius:20px;font-weight:500}
+
+/* TOAST */
+#toast-container{position:fixed;top:72px;right:20px;z-index:5000;display:flex;flex-direction:column;gap:8px}
+.toast{padding:12px 18px;border-radius:var(--radius);color:#fff;font-size:13px;font-weight:600;min-width:280px;max-width:380px;box-shadow:0 8px 32px rgba(0,0,0,.3);transform:translateX(120%);transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.1)}
+.toast.show{transform:translateX(0)}
+.toast-success{background:linear-gradient(135deg,#1a7a42,#27AE60)}
+.toast-warning{background:linear-gradient(135deg,#b8640a,#F39C12)}
+.toast-error{background:linear-gradient(135deg,#9c2418,#E74C3C)}
+.toast-info{background:linear-gradient(135deg,#1e6fa0,#3498DB)}
+.toast .toast-icon{flex-shrink:0}
+.toast .toast-icon svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+
+/* FOOTER */
+#app-footer{text-align:center;padding:20px;font-size:11px;color:var(--text-muted);border-top:1px solid var(--border);margin-top:32px}
+
+.chart-container{position:relative;height:200px;margin-top:8px}
+
+.defect-history-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border-light);font-size:13px;align-items:flex-start}
+.defect-history-item:last-child{border-bottom:none}
+.dh-time{color:var(--text-muted);white-space:nowrap;min-width:120px;font-family:var(--mono);font-size:12px}
+
+/* ========== SETTINGS ========== */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.settings-section{margin-bottom:6px}
+.settings-section h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.5px}
+.settings-section h4 svg{width:16px;height:16px;stroke:var(--accent);fill:none;stroke-width:2}
+.theme-options{display:flex;gap:8px;flex-wrap:wrap}
+.theme-option{display:flex;align-items:center;gap:8px;padding:10px 16px;border:2px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .15s;background:var(--bg-secondary);min-width:120px}
+.theme-option:hover{border-color:var(--text-muted)}
+.theme-option.active{border-color:var(--accent);background:var(--accent-glow)}
+.theme-option .theme-preview{width:24px;height:24px;border-radius:6px;border:2px solid var(--border)}
+.theme-option span{font-size:13px;font-weight:600}
+.color-options{display:flex;gap:8px;flex-wrap:wrap}
+.color-option{width:36px;height:36px;border-radius:8px;cursor:pointer;border:3px solid transparent;transition:all .15s;display:flex;align-items:center;justify-content:center}
+.color-option:hover{transform:scale(1.1)}
+.color-option.active{border-color:var(--text);box-shadow:0 0 0 2px var(--bg),0 0 0 4px currentColor}
+.color-option svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:3;display:none}
+.color-option.active svg{display:block}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border-light)}
+.setting-row:last-child{border-bottom:none}
+.setting-row .setting-label{font-size:13px;font-weight:500;color:var(--text)}
+.setting-row .setting-desc{font-size:11px;color:var(--text-muted);margin-top:2px}
+.toggle-switch{position:relative;width:44px;height:24px;cursor:pointer;flex-shrink:0}
+.toggle-switch input{display:none}
+.toggle-switch .slider{position:absolute;inset:0;background:var(--border);border-radius:12px;transition:.2s}
+.toggle-switch .slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s}
+.toggle-switch input:checked+.slider{background:var(--accent)}
+.toggle-switch input:checked+.slider::before{transform:translateX(20px)}
+.setting-select{width:160px;padding:6px 10px;font-size:12px}
+.db-info{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.db-info-item{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);padding:12px;text-align:center}
+.db-info-item .db-num{font-size:22px;font-weight:800;color:var(--accent);font-family:var(--mono)}
+.db-info-item .db-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;margin-top:4px;letter-spacing:.5px}
+
+/* RESPONSIVE */
+@media(max-width:1024px){
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .settings-grid{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  #nav-links{display:none;position:fixed;top:var(--nav-h);left:0;right:0;background:var(--nav);flex-direction:column;padding:12px;gap:2px;box-shadow:0 8px 24px rgba(0,0,0,.4);border-bottom:1px solid var(--border)}
+  #nav-links.open{display:flex}
+  #hamburger{display:block}
+  .dash-grid{grid-template-columns:1fr}
+  .passport-grid{grid-template-columns:1fr}
+  .filters-row{flex-direction:column}
+  .status-panel{flex-direction:column;gap:14px}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .page-header{flex-direction:column;align-items:flex-start}
+  #nav-user .user-info{display:none}
+  .db-info{grid-template-columns:1fr 1fr}
+}
+@media(max-width:480px){
+  #app-container{padding-left:12px;padding-right:12px}
+  .modal{margin:8px;border-radius:12px}
+  .stats-row{grid-template-columns:1fr}
+  .login-card{padding:24px 20px}
+  .db-info{grid-template-columns:1fr}
+}
+
+/* PRINT */
+@media print{
+  #navbar,#toast-container,#hamburger,#btn-logout,.btn-primary,.btn-secondary,.btn-danger,.btn-success,.filters-row,.pagination,.info-bar .export-btns,#app-footer{display:none!important}
+  #app-container{padding-top:0!important;max-width:100%!important}
+  .card{box-shadow:none!important;border:1px solid #ccc;break-inside:avoid}
+  body{background:#fff!important;color:#000!important;font-size:12px}
+  [data-theme="dark"] *{background:transparent!important;color:#000!important;border-color:#ccc!important}
+  .section.active{display:block!important}
+  .print-header{display:block!important;text-align:center;padding:20px 0;border-bottom:2px solid #333;margin-bottom:20px}
+  .print-header h1{font-size:16px;font-weight:700}
+  .print-header p{font-size:11px;color:#666}
+  th{background:#eee!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .badge{border:1px solid currentColor}
+}
+.print-header{display:none}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-page">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 56 56"><path d="M14 28h6l4-10 4 20 4-14 4 8h6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="28" cy="12" r="3" fill="#fff" opacity=".6" stroke="none"/></svg>
+      </div>
+      <h2>Система контроля качества</h2>
+      <p>ПАО «Новолипецкий металлургический комбинат»</p>
+    </div>
+    <div id="login-error" class="login-error"></div>
+    <form id="login-form">
+      <div class="form-group">
+        <label>Логин</label>
+        <div class="input-icon">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <input type="text" id="login-username" placeholder="Введите логин" required autocomplete="username">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Пароль</label>
+        <div class="input-icon">
+          <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input type="password" id="login-password" placeholder="Введите пароль" required autocomplete="current-password">
+        </div>
+      </div>
+      <button type="submit" class="btn-primary">Войти в систему</button>
+    </form>
+    <div class="login-footer">
+      <a href="#" onclick="showToast('Обратитесь к администратору системы','info');return false;">Восстановить доступ</a>
+    </div>
+    <div class="login-hint">
+      <strong>Демо-доступ:</strong><br>
+      admin / admin123 — Администратор<br>
+      technolog / tech1234 — Технолог<br>
+      otk / otk12345 — Контролёр ОТК<br>
+      operator / oper1234 — Оператор
+    </div>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<nav id="navbar" style="display:none">
+  <div class="logo" onclick="navigate('dashboard')">
+    <div class="logo-icon">
+      <svg viewBox="0 0 56 56"><path d="M14 28h6l4-10 4 20 4-14 4 8h6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="logo-text">СКК НЛМК<span>Контроль качества</span></div>
+  </div>
+  <button id="hamburger" onclick="document.getElementById('nav-links').classList.toggle('open')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div id="nav-links">
+    <div class="nav-item active" data-page="dashboard" onclick="navigate('dashboard')">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Дашборд
+    </div>
+    <div class="nav-item" data-page="defects" onclick="navigate('defects')">
+      <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Архив дефектов
+    </div>
+    <div class="nav-item" data-page="passport" onclick="navigate('passport')">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Паспорт рулона
+    </div>
+    <div class="nav-item" data-page="events" onclick="navigate('events')">
+      <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      Журнал событий
+    </div>
+    <div class="nav-item" data-page="admin" onclick="navigate('admin')">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Пользователи
+    </div>
+    <div class="nav-item" data-page="settings" onclick="navigate('settings')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Настройки
+    </div>
+  </div>
+  <div id="nav-user">
+    <div class="user-info">
+      <div class="user-name" id="nav-fullname"></div>
+      <div class="user-role" id="nav-role"></div>
+    </div>
+    <div class="user-avatar" id="nav-avatar"></div>
+    <button id="btn-logout" onclick="logout()">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Выход
+    </button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div id="app-container">
+
+  <!-- ======= DASHBOARD ======= -->
+  <section id="page-dashboard" class="section active">
+    <div class="print-header"><h1>ПАО «НЛМК» — Система контроля качества</h1><p>Отчёт по состоянию на <span id="print-date"></span></p></div>
+    <div class="page-header">
+      <div><h1><span class="ic ic-lg"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span> Главный дашборд</h1><div class="page-subtitle">Мониторинг производственной линии в реальном времени</div></div>
+    </div>
+
+    <div class="stats-row">
+      <div class="card stat-card sc-blue"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><div class="stat-num" id="stat-total-rolls">0</div><div class="stat-label">Всего рулонов</div></div>
+      <div class="card stat-card sc-red"><div class="stat-icon"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div class="stat-num" id="stat-total-defects">0</div><div class="stat-label">Всего дефектов</div></div>
+      <div class="card stat-card sc-yellow"><div class="stat-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div class="stat-num" id="stat-critical">0</div><div class="stat-label">Критические</div></div>
+      <div class="card stat-card sc-green"><div class="stat-icon"><svg viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg></div><div class="stat-num" id="stat-resolved">0%</div><div class="stat-label">Устранено</div></div>
+    </div>
+
+    <div class="card status-panel status-running" id="line-status-panel">
+      <div class="status-item"><div class="status-label">Текущий рулон</div><div class="status-value" id="ls-roll">--</div></div>
+      <div class="status-item"><div class="status-label">Скорость линии</div><div class="status-value" id="ls-speed">-- м/мин</div></div>
+      <div class="status-item"><div class="status-label">Температура</div><div class="status-value" id="ls-temp">-- °C</div></div>
+      <div class="status-item"><div class="status-label">Статус оборудования</div><div class="status-value" id="ls-equip" style="font-family:var(--font);font-size:15px"><span class="status-indicator indicator-green"></span> Работает</div></div>
+    </div>
+
+    <div class="dash-grid">
+      <div class="card">
+        <div class="card-title"><div class="card-icon" style="background:rgba(231,76,60,.12);color:var(--red)"><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div> Активные оповещения <span class="badge badge-red" id="alerts-count">0</span></div>
+        <div id="alerts-list"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="card-icon" style="background:var(--accent-glow);color:var(--accent)"><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg></div> Последние дефекты</div>
+        <div id="recent-defects"></div>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <div class="card">
+        <div class="card-title"><div class="card-icon" style="background:rgba(243,156,18,.12);color:var(--yellow)"><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg></div> Распределение по критичности</div>
+        <div class="chart-container"><canvas id="chart-severity"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="card-icon" style="background:rgba(39,174,96,.12);color:var(--green)"><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div> Распределение по типам</div>
+        <div class="chart-container"><canvas id="chart-types"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======= DEFECTS ARCHIVE ======= -->
+  <section id="page-defects" class="section">
+    <div class="print-header"><h1>ПАО «НЛМК» — Архив дефектов</h1><p>Дата: <span class="print-now"></span></p></div>
+    <div class="page-header">
+      <div><h1><span class="ic ic-lg"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span> Архив дефектов</h1><div class="page-subtitle">Поиск, фильтрация и анализ зарегистрированных дефектов</div></div>
+      <button class="btn-primary btn-icon" onclick="openRegisterDefectModal()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Зарегистрировать
+      </button>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="card-icon" style="background:var(--accent-glow);color:var(--accent)"><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2"><polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"/></svg></div> Фильтры</div>
+      <div class="filters-row">
+        <div class="form-group"><label>Дата от</label><input type="date" id="f-date-from"></div>
+        <div class="form-group"><label>Дата до</label><input type="date" id="f-date-to"></div>
+        <div class="form-group"><label>Тип дефекта</label><select id="f-defect-type"><option value="">Все типы</option></select></div>
+        <div class="form-group"><label>Критичность</label><select id="f-severity"><option value="">Все</option><option value="low">Низкий</option><option value="medium">Средний</option><option value="high">Высокий</option><option value="critical">Критический</option></select></div>
+        <div class="form-group"><label>Статус</label><select id="f-status"><option value="">Все</option><option value="new">Новый</option><option value="inProgress">В работе</option><option value="resolved">Устранён</option><option value="closed">Закрыт</option></select></div>
+        <div class="form-group"><label>Рулон</label><input type="text" id="f-roll" placeholder="Номер рулона"></div>
+        <div class="form-group btn-group">
+          <button class="btn-primary btn-sm" onclick="applyDefectFilters()">Применить</button>
+          <button class="btn-secondary btn-sm" onclick="resetDefectFilters()">Сбросить</button>
+        </div>
+      </div>
+    </div>
+    <div class="info-bar">
+      <span id="defects-count-info">Записи: 0</span>
+      <div class="export-btns">
+        <button class="btn-sm btn-secondary btn-icon" onclick="exportDefectsPDF()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg> PDF</button>
+        <button class="btn-sm btn-secondary btn-icon" onclick="exportDefectsCSV()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> CSV</button>
+      </div>
+    </div>
+    <div class="card table-wrapper">
+      <table id="defects-table">
+        <thead><tr><th data-sort="id">ID</th><th data-sort="rollNumber">Рулон</th><th data-sort="defectType">Тип</th><th data-sort="severity">Критичность</th><th data-sort="status">Статус</th><th data-sort="detectedAt">Дата</th><th>Действия</th></tr></thead>
+        <tbody id="defects-tbody"></tbody>
+      </table>
+      <div class="pagination" id="defects-pagination"></div>
+    </div>
+  </section>
+
+  <!-- ======= PASSPORT ======= -->
+  <section id="page-passport" class="section">
+    <div class="print-header"><h1>ПАО «НЛМК» — Паспорт рулона</h1><p>Дата: <span class="print-now"></span></p></div>
+    <div class="page-header">
+      <div><h1><span class="ic ic-lg"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span> Паспорт рулона</h1><div class="page-subtitle">Полная информация о единице продукции</div></div>
+    </div>
+    <div class="card">
+      <div class="search-big">
+        <span class="search-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+        <input type="text" id="passport-search" placeholder="Введите номер рулона..." oninput="onPassportSearch(this.value)">
+        <div class="autocomplete-list" id="passport-ac"></div>
+      </div>
+    </div>
+    <div id="passport-content" style="display:none">
+      <div class="card" style="position:relative">
+        <div class="card-title"><div class="card-icon" style="background:var(--accent-glow);color:var(--accent)"><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></div> Общая информация</div>
+        <div id="passport-status-badge" style="position:absolute;top:22px;right:22px"></div>
+        <div class="passport-grid" id="passport-info"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="card-icon" style="background:rgba(231,76,60,.12);color:var(--red)"><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg></div> Дефекты рулона</div>
+        <div id="passport-defects"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="card-icon" style="background:rgba(243,156,18,.12);color:var(--yellow)"><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg></div> Галерея дефектов</div>
+        <div class="gallery" id="passport-gallery"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn-primary btn-icon btn-sm" onclick="exportPassportPDF()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg> Экспорт в PDF</button>
+        <button class="btn-secondary btn-icon btn-sm" onclick="window.print()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 6,2 18,2 18,9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Печать</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======= EVENTS ======= -->
+  <section id="page-events" class="section">
+    <div class="print-header"><h1>ПАО «НЛМК» — Журнал событий</h1><p>Дата: <span class="print-now"></span></p></div>
+    <div class="page-header">
+      <div><h1><span class="ic ic-lg"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span> Журнал событий</h1><div class="page-subtitle">Хронологическая запись действий в системе</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="card-icon" style="background:var(--accent-glow);color:var(--accent)"><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2"><polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"/></svg></div> Фильтры</div>
+      <div class="filters-row">
+        <div class="form-group"><label>Дата от</label><input type="date" id="ef-date-from"></div>
+        <div class="form-group"><label>Дата до</label><input type="date" id="ef-date-to"></div>
+        <div class="form-group"><label>Уровень</label><select id="ef-level"><option value="">Все</option><option value="info">Информация</option><option value="warning">Предупреждение</option><option value="error">Ошибка</option><option value="critical">Критическое</option></select></div>
+        <div class="form-group"><label>Тип события</label><select id="ef-type"><option value="">Все</option><option value="auth">Авторизация</option><option value="defect">Дефект</option><option value="status">Статус</option><option value="admin">Администрирование</option><option value="system">Система</option><option value="export">Экспорт</option></select></div>
+        <div class="form-group btn-group">
+          <button class="btn-primary btn-sm" onclick="applyEventFilters()">Применить</button>
+          <button class="btn-secondary btn-sm" onclick="resetEventFilters()">Сбросить</button>
+        </div>
+      </div>
+    </div>
+    <div class="info-bar">
+      <span id="events-count-info">Записи: 0</span>
+      <div class="export-btns">
+        <button class="btn-sm btn-secondary btn-icon" onclick="exportEventsPDF()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg> PDF</button>
+        <button class="btn-sm btn-secondary btn-icon" onclick="exportEventsCSV()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> CSV</button>
+      </div>
+    </div>
+    <div class="card table-wrapper">
+      <table><thead><tr><th>Время</th><th>Уровень</th><th>Тип</th><th>Описание</th><th>Пользователь</th></tr></thead>
+        <tbody id="events-tbody"></tbody>
+      </table>
+      <div class="pagination" id="events-pagination"></div>
+    </div>
+  </section>
+
+  <!-- ======= ADMIN ======= -->
+  <section id="page-admin" class="section">
+    <div class="print-header"><h1>ПАО «НЛМК» — Пользователи</h1><p>Дата: <span class="print-now"></span></p></div>
+    <div class="page-header">
+      <div><h1><span class="ic ic-lg"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Управление пользователями</h1><div class="page-subtitle">Учётные записи и роли</div></div>
+      <button class="btn-primary btn-icon" onclick="openUserModal()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Добавить</button>
+    </div>
+    <div class="info-bar">
+      <span id="users-count-info">Пользователи: 0</span>
+      <div class="export-btns"><button class="btn-sm btn-secondary btn-icon" onclick="exportUsersPDF()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg> PDF</button></div>
+    </div>
+    <div class="card table-wrapper">
+      <table><thead><tr><th>ID</th><th>Логин</th><th>ФИО</th><th>Роль</th><th>Подразделение</th><th>Статус</th><th>Последний вход</th><th>Действия</th></tr></thead>
+        <tbody id="users-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ======= SETTINGS ======= -->
+  <section id="page-settings" class="section">
+    <div class="page-header">
+      <div><h1><span class="ic ic-lg"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> Настройки</h1><div class="page-subtitle">Персонализация и управление системой</div></div>
+    </div>
+    <div class="settings-grid">
+      <div>
+        <div class="card">
+          <div class="settings-section">
+            <h4><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> Тема оформления</h4>
+            <div class="theme-options" id="theme-options">
+              <div class="theme-option" data-theme-val="dark" onclick="setTheme('dark')">
+                <div class="theme-preview" style="background:#1e2538;border-color:#2d3548"></div>
+                <span>Тёмная</span>
+              </div>
+              <div class="theme-option" data-theme-val="light" onclick="setTheme('light')">
+                <div class="theme-preview" style="background:#ffffff;border-color:#d1d5db"></div>
+                <span>Светлая</span>
+              </div>
+              <div class="theme-option" data-theme-val="system" onclick="setTheme('system')">
+                <div class="theme-preview" style="background:linear-gradient(135deg,#1e2538 50%,#fff 50%);border-color:#999"></div>
+                <span>Системная</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="settings-section">
+            <h4><svg viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg> Акцентный цвет</h4>
+            <div class="color-options" id="color-options">
+              <div class="color-option" data-color="blue" style="background:#3498DB" onclick="setAccent('blue')"><svg viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg></div>
+              <div class="color-option" data-color="teal" style="background:#00b894" onclick="setAccent('teal')"><svg viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg></div>
+              <div class="color-option" data-color="purple" style="background:#6c5ce7" onclick="setAccent('purple')"><svg viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg></div>
+              <div class="color-option" data-color="orange" style="background:#e17055" onclick="setAccent('orange')"><svg viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg></div>
+              <div class="color-option" data-color="emerald" style="background:#00b16a" onclick="setAccent('emerald')"><svg viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="settings-section">
+            <h4><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> Интерфейс</h4>
+            <div class="setting-row">
+              <div><div class="setting-label">Компактный режим</div><div class="setting-desc">Уменьшенные отступы и размер шрифта</div></div>
+              <label class="toggle-switch"><input type="checkbox" id="set-compact" onchange="toggleSetting('compact',this.checked)"><span class="slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Анимации</div><div class="setting-desc">Плавные переходы и эффекты</div></div>
+              <label class="toggle-switch"><input type="checkbox" id="set-animations" checked onchange="toggleSetting('animations',this.checked)"><span class="slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Записей на странице</div><div class="setting-desc">Количество строк в таблицах</div></div>
+              <select class="setting-select" id="set-pagesize" onchange="toggleSetting('pageSize',this.value)">
+                <option value="10">10</option><option value="20" selected>20</option><option value="50">50</option><option value="100">100</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="settings-section">
+            <h4><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> Уведомления</h4>
+            <div class="setting-row">
+              <div><div class="setting-label">Toast-уведомления</div><div class="setting-desc">Всплывающие сообщения</div></div>
+              <label class="toggle-switch"><input type="checkbox" id="set-toasts" checked onchange="toggleSetting('toasts',this.checked)"><span class="slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Время отображения</div><div class="setting-desc">Длительность показа уведомлений</div></div>
+              <select class="setting-select" id="set-toast-duration" onchange="toggleSetting('toastDuration',this.value)">
+                <option value="2000">2 сек</option><option value="3500" selected>3.5 сек</option><option value="5000">5 сек</option><option value="8000">8 сек</option>
+              </select>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Автообновление дашборда</div><div class="setting-desc">Интервал обновления данных линии</div></div>
+              <select class="setting-select" id="set-refresh" onchange="toggleSetting('refreshInterval',this.value)">
+                <option value="3000">3 сек</option><option value="5000" selected>5 сек</option><option value="10000">10 сек</option><option value="30000">30 сек</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="settings-section">
+            <h4><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg> База данных</h4>
+            <div class="db-info" id="db-info"></div>
+            <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn-sm btn-secondary btn-icon" onclick="exportAllData()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Экспорт данных</button>
+              <button class="btn-sm btn-danger btn-icon" onclick="confirmResetDB()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23,4 23,10 17,10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Сброс базы</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="settings-section">
+            <h4><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> О системе</h4>
+            <div style="font-size:13px;line-height:1.8;color:var(--text-light)">
+              <p><strong style="color:var(--text)">СКК ПАО «НЛМК»</strong> — Система контроля качества металлопродукции</p>
+              <p>Версия: 1.0.0</p>
+              <p>Разработана в рамках курсового проекта</p>
+              <p>МДК.05.02 Разработка кода информационных систем</p>
+              <p style="margin-top:8px;font-size:11px;color:var(--text-muted)">Специальность 09.02.07 Информационные системы и программирование</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer id="app-footer">ПАО «Новолипецкий металлургический комбинат» — Система контроля качества v1.0</footer>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-defect">
+  <div class="modal">
+    <div class="modal-header"><h3>Регистрация дефекта</h3><button class="modal-close" onclick="closeModal('modal-defect')">&#215;</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Номер рулона *</label><input type="text" id="md-roll" placeholder="Начните вводить номер рулона" oninput="onDefectRollSearch(this.value)"><div class="autocomplete-list" id="md-roll-ac"></div><div class="field-error" id="md-roll-err">Рулон не найден в базе данных</div></div>
+      <div class="form-group"><label>Тип дефекта *</label><select id="md-type"><option value="">Выберите тип дефекта</option></select><div class="field-error" id="md-type-err">Выберите тип дефекта</div></div>
+      <div class="form-group"><label>Критичность *</label><select id="md-severity"><option value="">Выберите уровень</option><option value="low">Низкий</option><option value="medium">Средний</option><option value="high">Высокий</option><option value="critical">Критический</option></select><div class="field-error" id="md-sev-err">Выберите уровень критичности</div></div>
+      <div class="form-group"><label>Позиция на рулоне</label><input type="text" id="md-position" placeholder="Кромка левая, Центр, 5-10м от начала"></div>
+      <div class="form-group"><label>Описание *</label><textarea id="md-desc" rows="3" placeholder="Описание обнаруженного дефекта..."></textarea><div class="field-error" id="md-desc-err">Введите описание дефекта</div></div>
+    </div>
+    <div class="modal-footer"><button class="btn-secondary" onclick="closeModal('modal-defect')">Отмена</button><button class="btn-primary" onclick="registerDefect()">Зарегистрировать</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-defect-detail">
+  <div class="modal" style="width:660px">
+    <div class="modal-header"><h3 id="mdd-title">Дефект</h3><button class="modal-close" onclick="closeModal('modal-defect-detail')">&#215;</button></div>
+    <div class="modal-body" id="mdd-body"></div>
+    <div class="modal-footer" id="mdd-footer"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-user">
+  <div class="modal">
+    <div class="modal-header"><h3 id="mu-title">Добавить пользователя</h3><button class="modal-close" onclick="closeModal('modal-user')">&#215;</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="mu-id">
+      <div class="form-group"><label>Логин *</label><input type="text" id="mu-username" placeholder="Введите логин"><div class="field-error" id="mu-user-err">Логин уже существует или пуст</div></div>
+      <div class="form-group"><label>Пароль *</label><input type="password" id="mu-password" placeholder="Минимум 8 символов"><div class="field-error" id="mu-pass-err">Минимум 8 символов, буквы и цифры</div></div>
+      <div class="form-group"><label>ФИО *</label><input type="text" id="mu-fullname" placeholder="Фамилия Имя Отчество"></div>
+      <div class="form-group"><label>Подразделение</label><input type="text" id="mu-dept" placeholder="Подразделение"></div>
+      <div class="form-group"><label>Роль *</label><select id="mu-role"><option value="">Выберите роль</option><option value="admin">Администратор</option><option value="technologist">Технолог</option><option value="otk">Контролёр ОТК</option><option value="operator">Оператор</option></select></div>
+    </div>
+    <div class="modal-footer"><button class="btn-secondary" onclick="closeModal('modal-user')">Отмена</button><button class="btn-primary" onclick="saveUser()">Сохранить</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal" style="width:400px">
+    <div class="modal-header"><h3>Подтверждение</h3><button class="modal-close" onclick="closeModal('modal-confirm')">&#215;</button></div>
+    <div class="modal-body"><p id="confirm-msg" style="font-size:14px;line-height:1.6">Вы уверены?</p></div>
+    <div class="modal-footer"><button class="btn-secondary" onclick="closeModal('modal-confirm')">Отмена</button><button class="btn-danger" id="confirm-btn">Подтвердить</button></div>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox">
+  <button class="lb-close" onclick="closeLightbox()">&#215;</button>
+  <button class="lb-nav lb-prev" onclick="lbNav(-1)">&#8249;</button>
+  <img id="lb-img" src="" alt="Изображение дефекта">
+  <button class="lb-nav lb-next" onclick="lbNav(1)">&#8250;</button>
+  <div class="lb-caption" id="lb-caption"></div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+// ===================================================================
+// CONSTANTS
+// ===================================================================
+const DEFECT_TYPES=['Окалина','Рябизна','Вмятина','Царапина','Трещина','Расслоение','Коробоватость','Серповидность','Плёна','Закат','Раковина','Пятна загрязнения'];
+const SEVERITY_MAP={low:'Низкий',medium:'Средний',high:'Высокий',critical:'Критический'};
+const SEVERITY_BADGE={low:'badge-blue',medium:'badge-yellow',high:'badge-red',critical:'badge-dark-red'};
+const SEVERITY_ORDER={low:1,medium:2,high:3,critical:4};
+const STATUS_MAP={new:'Новый',inProgress:'В работе',resolved:'Устранён',closed:'Закрыт'};
+const STATUS_BADGE={new:'badge-blue',inProgress:'badge-yellow',resolved:'badge-green',closed:'badge-gray'};
+const ROLL_STATUS_MAP={pending:'Ожидает проверки',approved:'Годен',rejected:'Брак',hold:'На удержании'};
+const ROLL_STATUS_BADGE={pending:'badge-yellow',approved:'badge-green',rejected:'badge-red',hold:'badge-gray'};
+const EQUIP_STATUS_MAP={running:'Работает',stopped:'Остановлено',maintenance:'Тех. обслуживание',error:'Ошибка'};
+const LEVEL_MAP={info:'Информация',warning:'Предупреждение',error:'Ошибка',critical:'Критическое'};
+const LEVEL_BADGE={info:'badge-blue',warning:'badge-yellow',error:'badge-red',critical:'badge-dark-red'};
+const ROLE_MAP={admin:'Администратор',technologist:'Технолог',otk:'Контролёр ОТК',operator:'Оператор'};
+const ROLE_PAGES={admin:['dashboard','defects','passport','events','admin','settings'],technologist:['dashboard','defects','passport','events','settings'],otk:['dashboard','defects','passport','settings'],operator:['dashboard','settings']};
+
+// ===================================================================
+// SETTINGS
+// ===================================================================
+const DEFAULT_SETTINGS={theme:'dark',accent:'blue',compact:false,animations:true,pageSize:20,toasts:true,toastDuration:3500,refreshInterval:5000};
+let appSettings={...DEFAULT_SETTINGS};
+
+function loadSettings(){
+  try{const s=JSON.parse(localStorage.getItem('appSettings'));if(s)appSettings={...DEFAULT_SETTINGS,...s};}catch(e){}
+  applySettings();
+}
+function saveSettings(){localStorage.setItem('appSettings',JSON.stringify(appSettings));}
+function applySettings(){
+  // Theme
+  const resolvedTheme=appSettings.theme==='system'?(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'):appSettings.theme;
+  document.documentElement.setAttribute('data-theme',resolvedTheme);
+  document.documentElement.setAttribute('data-accent',appSettings.accent);
+  // Compact
+  document.documentElement.style.fontSize=appSettings.compact?'12px':'14px';
+  // Animations
+  if(!appSettings.animations)document.documentElement.style.setProperty('--transition','0s');
+  else document.documentElement.style.setProperty('--transition','.2s ease');
+  // Update UI
+  document.querySelectorAll('.theme-option').forEach(el=>el.classList.toggle('active',el.dataset.themeVal===appSettings.theme));
+  document.querySelectorAll('.color-option').forEach(el=>el.classList.toggle('active',el.dataset.color===appSettings.accent));
+  const setCompact=document.getElementById('set-compact');if(setCompact)setCompact.checked=appSettings.compact;
+  const setAnim=document.getElementById('set-animations');if(setAnim)setAnim.checked=appSettings.animations;
+  const setPS=document.getElementById('set-pagesize');if(setPS)setPS.value=appSettings.pageSize;
+  const setToasts=document.getElementById('set-toasts');if(setToasts)setToasts.checked=appSettings.toasts;
+  const setTD=document.getElementById('set-toast-duration');if(setTD)setTD.value=appSettings.toastDuration;
+  const setRef=document.getElementById('set-refresh');if(setRef)setRef.value=appSettings.refreshInterval;
+  // Update chart colors
+  Chart.defaults.color=resolvedTheme==='dark'?'#8b95a5':'#6b7280';
+  Chart.defaults.borderColor=resolvedTheme==='dark'?'#2d3548':'#e5e7eb';
+}
+function setTheme(t){appSettings.theme=t;saveSettings();applySettings();}
+function setAccent(c){appSettings.accent=c;saveSettings();applySettings();if(chartSeverity||chartTypes){const d=dbGet('defects');buildCharts(d);}}
+function toggleSetting(key,val){
+  appSettings[key]=key==='pageSize'||key==='toastDuration'||key==='refreshInterval'?+val:val;
+  saveSettings();applySettings();
+  if(key==='refreshInterval'){clearInterval(lineInterval);lineInterval=setInterval(simulateLineStatus,appSettings.refreshInterval);}
+  if(key==='pageSize')defectPageSize=appSettings.pageSize;
+}
+window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{if(appSettings.theme==='system')applySettings();});
+
+// ===================================================================
+// DB LAYER
+// ===================================================================
+function dbGet(k){try{return JSON.parse(localStorage.getItem(k))||[];}catch(e){return[];}}
+function dbSet(k,d){localStorage.setItem(k,JSON.stringify(d));}
+function dbNextId(k){const items=dbGet(k);return items.length?Math.max(...items.map(i=>i.id))+1:1;}
+function simpleHash(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return'h'+Math.abs(h).toString(36);}
+function getSession(){try{return JSON.parse(sessionStorage.getItem('session'));}catch(e){return null;}}
+function setSession(u){sessionStorage.setItem('session',JSON.stringify({id:u.id,username:u.username,role:u.role,fullName:u.fullName}));}
+function clearSession(){sessionStorage.removeItem('session');}
+
+// ===================================================================
+// SEED
+// ===================================================================
+function seedDatabase(){
+  if(localStorage.getItem('_seeded_v4'))return;
+  const preserve=localStorage.getItem('appSettings');
+  localStorage.clear();
+  if(preserve)localStorage.setItem('appSettings',preserve);
+  const users=[
+    {id:1,username:'admin',password:simpleHash('admin123'),role:'admin',fullName:'Иванов Игорь Андреевич',department:'ИТ-отдел',isActive:true,lastLogin:null},
+    {id:2,username:'technolog',password:simpleHash('tech1234'),role:'technologist',fullName:'Петров Павел Сергеевич',department:'Технологический отдел',isActive:true,lastLogin:null},
+    {id:3,username:'otk',password:simpleHash('otk12345'),role:'otk',fullName:'Сидорова Анна Владимировна',department:'Отдел технического контроля',isActive:true,lastLogin:null},
+    {id:4,username:'operator',password:simpleHash('oper1234'),role:'operator',fullName:'Козлов Дмитрий Михайлович',department:'Цех №5',isActive:true,lastLogin:null},
+  ];
+  dbSet('users',users);
+  const steels=['08Ю','08пс','Ст3сп','09Г2С','10ХСНД','12Х18Н10Т'];
+  const aggregates=['Стан 2000','Стан 1700','НГСП','АПП-1','АПП-2'];
+  const rolls=[];
+  for(let i=1;i<=50;i++){const d=new Date(2025,Math.floor(Math.random()*5),Math.floor(Math.random()*28)+1);rolls.push({id:i,rollNumber:'НЛ-'+String(2025000+i),steelGrade:steels[Math.floor(Math.random()*steels.length)],width:[1000,1200,1250,1500,1800,2000][Math.floor(Math.random()*6)],thickness:+(0.4+Math.random()*3.6).toFixed(2),weight:+(5+Math.random()*20).toFixed(2),productionDate:d.toISOString().split('T')[0],aggregateId:aggregates[Math.floor(Math.random()*aggregates.length)],shiftNumber:Math.floor(Math.random()*4)+1,brigade:'Бригада '+(Math.floor(Math.random()*6)+1),status:['pending','approved','rejected','hold'][Math.floor(Math.random()*4)],tensileStrength:+(300+Math.random()*200).toFixed(1),hardness:+(50+Math.random()*40).toFixed(1)});}
+  dbSet('rolls',rolls);
+  const descriptions=['Обнаружен поверхностный дефект при визуальном контроле.','Нарушение геометрии проката при инструментальном контроле.','Отклонение качества поверхности по результатам лабораторного анализа.','Несоответствие нормативным требованиям при приёмочном контроле.','Дефект обнаружен автоматической системой контроля.','Дефект выявлен при операционном контроле на агрегате.','Несоответствие при контроле механических свойств.','Дефект зафиксирован контролёром ОТК при выборочной проверке.'];
+  const positions=['Кромка левая','Кромка правая','Центр','5-10м от начала','Хвостовая часть','По всей ширине','Верхняя поверхность','Нижняя поверхность'];
+  const sevs=['low','medium','high','critical'];const dStatuses=['new','inProgress','resolved','closed'];const defects=[];
+  for(let i=1;i<=80;i++){const roll=rolls[Math.floor(Math.random()*rolls.length)];const dt=new Date(roll.productionDate);dt.setHours(Math.floor(Math.random()*24),Math.floor(Math.random()*60));defects.push({id:i,rollId:roll.id,defectType:DEFECT_TYPES[Math.floor(Math.random()*DEFECT_TYPES.length)],severity:sevs[Math.floor(Math.random()*sevs.length)],description:descriptions[Math.floor(Math.random()*descriptions.length)],detectedAt:dt.toISOString(),detectedBy:[2,3][Math.floor(Math.random()*2)],position:positions[Math.floor(Math.random()*positions.length)],photos:'[]',status:dStatuses[Math.floor(Math.random()*dStatuses.length)]});}
+  dbSet('defects',defects);
+  const levels=['info','warning','error','critical'];const eventTypes=['auth','defect','status','system','admin'];
+  const msgs=['Пользователь выполнил вход в систему','Зарегистрирован новый дефект','Статус дефекта изменён','Изменение скорости линии','Создана учётная запись','Экспорт отчёта по дефектам','Обновлён статус рулона','Превышение нормы дефектов','Уведомление сгенерировано','Фильтрация данных','Изменены параметры учётной записи','Выход из системы','Обновлены данные оборудования','Сформирован паспорт качества'];
+  const events=[];
+  for(let i=1;i<=120;i++){const d=new Date(2025,Math.floor(Math.random()*5),Math.floor(Math.random()*28)+1,Math.floor(Math.random()*24),Math.floor(Math.random()*60));events.push({id:i,timestamp:d.toISOString(),level:levels[Math.floor(Math.random()*levels.length)],eventType:eventTypes[Math.floor(Math.random()*eventTypes.length)],message:msgs[Math.floor(Math.random()*msgs.length)],userId:[1,2,3,4][Math.floor(Math.random()*4)],relatedEntity:['roll','defect','user','system'][Math.floor(Math.random()*4)],relatedId:Math.floor(Math.random()*50)+1});}
+  dbSet('events',events);
+  dbSet('lineStatus',[{id:1,timestamp:new Date().toISOString(),currentRollId:rolls[0].id,lineSpeed:+(80+Math.random()*120).toFixed(1),equipmentStatus:'running',temperature:+(620+Math.random()*80).toFixed(1),alerts:'[]'}]);
+  const _now=Date.now();
+  dbSet('notifications',[
+    {id:1,type:'alert',title:'Критический дефект на линии',message:'Трещина на рулоне НЛ-2025003 — требуется немедленное вмешательство технолога',createdAt:new Date(_now).toISOString(),isRead:false,targetRole:'technologist',priority:1},
+    {id:2,type:'alert',title:'Аварийная остановка стана',message:'Стан 2000 — автоматическое отключение по сигналу датчика вибрации подшипника',createdAt:new Date(_now-180000).toISOString(),isRead:false,targetRole:'operator',priority:1},
+    {id:3,type:'warning',title:'Превышение нормы дефектов',message:'Рулон НЛ-2025008 — зарегистрировано 5 дефектов, допустимый порог: 3',createdAt:new Date(_now-360000).toISOString(),isRead:false,targetRole:'technologist',priority:2},
+    {id:4,type:'warning',title:'Отклонение температуры',message:'Температура на стане 1700 вышла за допустимый диапазон (758°C при норме 720°C)',createdAt:new Date(_now-540000).toISOString(),isRead:false,targetRole:'operator',priority:2},
+    {id:5,type:'warning',title:'Износ валков',message:'Ресурс валков на АПП-1 исчерпан на 92% — рекомендована плановая замена',createdAt:new Date(_now-720000).toISOString(),isRead:false,targetRole:'technologist',priority:2},
+    {id:6,type:'info',title:'Плановое техобслуживание',message:'ТО стана 2000 запланировано на 15:00 — необходимо подготовить остановку линии',createdAt:new Date(_now-900000).toISOString(),isRead:false,targetRole:'operator',priority:3},
+    {id:7,type:'warning',title:'Брак на линии',message:'Рулон НЛ-2025015 переведён в статус «Брак» — серповидность и расслоение',createdAt:new Date(_now-1080000).toISOString(),isRead:false,targetRole:'technologist',priority:2},
+    {id:8,type:'alert',title:'Критическое отклонение толщины',message:'Рулон НЛ-2025022 — толщина 0.38мм ниже минимально допустимой нормы (0.40мм)',createdAt:new Date(_now-1260000).toISOString(),isRead:false,targetRole:'otk',priority:1},
+    {id:9,type:'info',title:'Пересменка бригады',message:'Бригада 3 завершила смену, передача Бригаде 4 — проверьте протоколы приёмки',createdAt:new Date(_now-1440000).toISOString(),isRead:false,targetRole:'operator',priority:3},
+    {id:10,type:'warning',title:'Калибровка датчиков',message:'Датчик толщины на НГСП требует калибровки — последняя проверка 14 дней назад',createdAt:new Date(_now-1620000).toISOString(),isRead:false,targetRole:'technologist',priority:2}
+  ]);
+  localStorage.setItem('_seeded_v4','1');
+}
+
+// ===================================================================
+// HELPERS
+// ===================================================================
+function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=String(s);return d.innerHTML;}
+function fmtDateTime(iso){if(!iso)return'—';const d=new Date(iso);return d.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});}
+function fmtDate(iso){if(!iso)return'—';return new Date(iso).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric'});}
+function fmtDateFile(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function showFieldError(iId,eId){document.getElementById(iId).classList.add('error');document.getElementById(eId).style.display='block';}
+function hideFieldError(iId,eId){document.getElementById(iId).classList.remove('error');document.getElementById(eId).style.display='none';}
+function logEvent(level,eventType,message,relatedEntity,relatedId){const events=dbGet('events');const s=getSession();events.push({id:dbNextId('events'),timestamp:new Date().toISOString(),level,eventType,message,userId:s?s.id:0,relatedEntity:relatedEntity||'',relatedId:relatedId||0});dbSet('events',events);}
+
+// ===================================================================
+// TOAST
+// ===================================================================
+function showToast(msg,type='success'){
+  if(!appSettings.toasts)return;
+  const c=document.getElementById('toast-container');const t=document.createElement('div');
+  t.className='toast toast-'+type;
+  const icons={success:'<svg viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>',error:'<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',warning:'<svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',info:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'};
+  t.innerHTML='<span class="toast-icon">'+(icons[type]||'')+'</span><span>'+msg+'</span>';
+  c.appendChild(t);requestAnimationFrame(()=>t.classList.add('show'));
+  setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300);},appSettings.toastDuration);
+}
+
+// ===================================================================
+// MODAL
+// ===================================================================
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.addEventListener('click',e=>{if(e.target.classList.contains('modal-overlay')&&e.target.classList.contains('open'))e.target.classList.remove('open');});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));closeLightbox();}});
+
+// ===================================================================
+// AUTH
+// ===================================================================
+document.getElementById('login-form').addEventListener('submit',function(e){
+  e.preventDefault();
+  const u=document.getElementById('login-username').value.trim();const p=document.getElementById('login-password').value;
+  const users=dbGet('users');const user=users.find(x=>x.username===u&&x.isActive);const errEl=document.getElementById('login-error');
+  if(!user||user.password!==simpleHash(p)){errEl.textContent='Неверный логин или пароль.';errEl.style.display='block';logEvent('warning','auth','Неудачная попытка входа: '+u);return;}
+  user.lastLogin=new Date().toISOString();dbSet('users',users);setSession(user);logEvent('info','auth','Вход в систему: '+user.fullName,'user',user.id);errEl.style.display='none';showApp();
+});
+function logout(){logEvent('info','auth','Выход из системы');clearSession();document.getElementById('login-page').style.display='flex';document.getElementById('navbar').style.display='none';document.getElementById('app-container').style.display='none';document.getElementById('login-username').value='';document.getElementById('login-password').value='';}
+function showApp(){
+  const s=getSession();if(!s)return;
+  document.getElementById('login-page').style.display='none';document.getElementById('navbar').style.display='flex';document.getElementById('app-container').style.display='block';
+  document.getElementById('nav-fullname').textContent=s.fullName;document.getElementById('nav-role').textContent=ROLE_MAP[s.role]||s.role;
+  document.getElementById('nav-avatar').textContent=s.fullName.split(' ').map(w=>w[0]).join('').substring(0,2);
+  const allowed=ROLE_PAGES[s.role]||['dashboard'];
+  document.querySelectorAll('#nav-links .nav-item').forEach(el=>{el.style.display=allowed.includes(el.dataset.page)?'':'none';});
+  navigate('dashboard');populateDefectTypeSelects();
+}
+
+// ===================================================================
+// NAVIGATION
+// ===================================================================
+function navigate(page){
+  const s=getSession();if(!s)return;const allowed=ROLE_PAGES[s.role]||['dashboard'];
+  if(!allowed.includes(page)){showToast('Доступ запрещён','error');return;}
+  document.querySelectorAll('.section').forEach(el=>el.classList.remove('active'));
+  const sec=document.getElementById('page-'+page);if(sec)sec.classList.add('active');
+  document.querySelectorAll('#nav-links .nav-item').forEach(el=>el.classList.toggle('active',el.dataset.page===page));
+  document.getElementById('nav-links').classList.remove('open');
+  if(page==='dashboard')loadDashboard();else if(page==='defects')loadDefectsTable();else if(page==='events')loadEventsTable();else if(page==='admin')loadUsersTable();
+  else if(page==='settings'){applySettings();loadDBInfo();}
+  else if(page==='passport'){document.getElementById('passport-content').style.display='none';document.getElementById('passport-search').value='';}
+}
+
+// ===================================================================
+// DASHBOARD
+// ===================================================================
+let chartSeverity=null,chartTypes=null;
+function loadDashboard(){
+  const ls=dbGet('lineStatus');const last=ls[ls.length-1];const rolls=dbGet('rolls');const defects=dbGet('defects');
+  if(last){const roll=rolls.find(r=>r.id===last.currentRollId);document.getElementById('ls-roll').textContent=roll?roll.rollNumber:'--';document.getElementById('ls-speed').textContent=last.lineSpeed+' м/мин';document.getElementById('ls-temp').textContent=last.temperature+' °C';document.getElementById('line-status-panel').className='card status-panel status-'+last.equipmentStatus;const ic={running:'indicator-green',stopped:'indicator-yellow',maintenance:'indicator-yellow',error:'indicator-red'}[last.equipmentStatus]||'indicator-green';document.getElementById('ls-equip').innerHTML='<span class="status-indicator '+ic+'"></span> '+(EQUIP_STATUS_MAP[last.equipmentStatus]||last.equipmentStatus);}
+  document.getElementById('stat-total-rolls').textContent=rolls.length;document.getElementById('stat-total-defects').textContent=defects.length;
+  const critical=defects.filter(d=>d.severity==='critical'||d.severity==='high').length;document.getElementById('stat-critical').textContent=critical;
+  const resolved=defects.filter(d=>d.status==='resolved'||d.status==='closed').length;document.getElementById('stat-resolved').textContent=defects.length?Math.round(resolved/defects.length*100)+'%':'0%';
+  document.getElementById('print-date').textContent=fmtDateTime(new Date().toISOString());
+  const notifs=dbGet('notifications').filter(n=>!n.isRead).sort((a,b)=>a.priority-b.priority);document.getElementById('alerts-count').textContent=notifs.length;
+  const alertsEl=document.getElementById('alerts-list');
+  if(!notifs.length){alertsEl.innerHTML='<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg></div><p>Нет активных оповещений</p></div>';}
+  else{alertsEl.innerHTML=notifs.map(n=>{const cls={alert:'alert-critical',warning:'alert-warning',info:'alert-info'}[n.type]||'alert-info';return'<div class="alert-item '+cls+'"><div class="alert-text"><strong>'+esc(n.title)+'</strong>'+esc(n.message)+'</div><div><div class="alert-time">'+fmtDateTime(n.createdAt)+'</div><button class="btn-sm btn-secondary alert-btn" onclick="dismissAlert('+n.id+')">Прочитано</button></div></div>';}).join('');}
+  const recent=defects.sort((a,b)=>new Date(b.detectedAt)-new Date(a.detectedAt)).slice(0,10);const recentEl=document.getElementById('recent-defects');
+  if(!recent.length){recentEl.innerHTML='<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg></div><p>Нет дефектов</p></div>';}
+  else{recentEl.innerHTML=recent.map(d=>{const roll=rolls.find(r=>r.id===d.rollId);return'<div class="event-mini" onclick="showDefectDetail('+d.id+')"><span class="badge '+SEVERITY_BADGE[d.severity]+'">'+SEVERITY_MAP[d.severity]+'</span><span style="flex:1;font-size:12px">'+esc(d.defectType)+' — '+(roll?roll.rollNumber:'?')+'</span><span style="font-size:11px;color:var(--text-muted)">'+fmtDateTime(d.detectedAt)+'</span></div>';}).join('');}
+  buildCharts(defects);
+}
+function buildCharts(defects){
+  const theme=document.documentElement.getAttribute('data-theme');const gridColor=theme==='dark'?'rgba(255,255,255,.06)':'rgba(0,0,0,.06)';const textColor=theme==='dark'?'#8b95a5':'#6b7280';
+  const sevCounts={low:0,medium:0,high:0,critical:0};defects.forEach(d=>sevCounts[d.severity]=(sevCounts[d.severity]||0)+1);
+  if(chartSeverity)chartSeverity.destroy();
+  chartSeverity=new Chart(document.getElementById('chart-severity'),{type:'doughnut',data:{labels:['Низкий','Средний','Высокий','Критический'],datasets:[{data:[sevCounts.low,sevCounts.medium,sevCounts.high,sevCounts.critical],backgroundColor:['#3498DB','#F39C12','#E74C3C','#C0392B'],borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{padding:10,font:{size:11},usePointStyle:true,pointStyle:'circle',color:textColor}}}}});
+  const typeCounts={};defects.forEach(d=>typeCounts[d.defectType]=(typeCounts[d.defectType]||0)+1);
+  const sorted=Object.entries(typeCounts).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  if(chartTypes)chartTypes.destroy();
+  chartTypes=new Chart(document.getElementById('chart-types'),{type:'bar',data:{labels:sorted.map(s=>s[0]),datasets:[{data:sorted.map(s=>s[1]),backgroundColor:'rgba(52,152,219,.6)',borderRadius:4,barThickness:16}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:gridColor},ticks:{font:{size:10},color:textColor}},y:{grid:{display:false},ticks:{font:{size:10},color:textColor}}}}});
+}
+function dismissAlert(id){const notifs=dbGet('notifications');const n=notifs.find(x=>x.id===id);if(n){n.isRead=true;dbSet('notifications',notifs);loadDashboard();showToast('Оповещение прочитано');}}
+
+// ===================================================================
+// DEFECTS TABLE
+// ===================================================================
+let defectPage=1;let defectPageSize=20;let defectSortField='detectedAt';let defectSortDir=-1;
+function getFilteredDefects(){let defects=dbGet('defects');const rolls=dbGet('rolls');const f={dateFrom:document.getElementById('f-date-from').value,dateTo:document.getElementById('f-date-to').value,type:document.getElementById('f-defect-type').value,severity:document.getElementById('f-severity').value,status:document.getElementById('f-status').value,roll:document.getElementById('f-roll').value.trim().toLowerCase()};if(f.dateFrom)defects=defects.filter(d=>d.detectedAt>=f.dateFrom);if(f.dateTo)defects=defects.filter(d=>d.detectedAt<=f.dateTo+'T23:59:59');if(f.type)defects=defects.filter(d=>d.defectType===f.type);if(f.severity)defects=defects.filter(d=>d.severity===f.severity);if(f.status)defects=defects.filter(d=>d.status===f.status);if(f.roll){const mr=rolls.filter(r=>r.rollNumber.toLowerCase().includes(f.roll)).map(r=>r.id);defects=defects.filter(d=>mr.includes(d.rollId));}return defects;}
+function loadDefectsTable(){
+  defectPageSize=appSettings.pageSize;
+  const rolls=dbGet('rolls');let defects=getFilteredDefects();
+  defects.sort((a,b)=>{let va=a[defectSortField],vb=b[defectSortField];if(defectSortField==='rollNumber'){const ra=rolls.find(r=>r.id===a.rollId),rb=rolls.find(r=>r.id===b.rollId);va=ra?ra.rollNumber:'';vb=rb?rb.rollNumber:'';}if(defectSortField==='severity'){va=SEVERITY_ORDER[a.severity]||0;vb=SEVERITY_ORDER[b.severity]||0;}if(typeof va==='string')return va.localeCompare(vb)*defectSortDir;return((va||0)-(vb||0))*defectSortDir;});
+  const total=defects.length;const pages=Math.ceil(total/defectPageSize)||1;if(defectPage>pages)defectPage=pages;
+  const start=(defectPage-1)*defectPageSize;const slice=defects.slice(start,start+defectPageSize);
+  document.getElementById('defects-count-info').textContent='Записи '+(total?start+1:0)+' — '+Math.min(start+defectPageSize,total)+' из '+total;
+  document.getElementById('defects-tbody').innerHTML=slice.map(d=>{const roll=rolls.find(r=>r.id===d.rollId);return'<tr><td class="mono">'+d.id+'</td><td class="mono">'+(roll?roll.rollNumber:'—')+'</td><td>'+esc(d.defectType)+'</td><td><span class="badge '+SEVERITY_BADGE[d.severity]+'">'+SEVERITY_MAP[d.severity]+'</span></td><td><span class="badge '+STATUS_BADGE[d.status]+'">'+STATUS_MAP[d.status]+'</span></td><td style="white-space:nowrap">'+fmtDateTime(d.detectedAt)+'</td><td><button class="btn-sm btn-secondary" onclick="showDefectDetail('+d.id+')">Подробнее</button></td></tr>';}).join('');
+  renderPagination('defects-pagination',defectPage,pages,p=>{defectPage=p;loadDefectsTable();});
+}
+function applyDefectFilters(){defectPage=1;loadDefectsTable();}
+function resetDefectFilters(){['f-date-from','f-date-to','f-roll'].forEach(id=>document.getElementById(id).value='');['f-defect-type','f-severity','f-status'].forEach(id=>document.getElementById(id).value='');defectPage=1;loadDefectsTable();}
+document.getElementById('defects-table').querySelector('thead').addEventListener('click',e=>{const th=e.target.closest('th[data-sort]');if(!th)return;const field=th.dataset.sort;if(defectSortField===field)defectSortDir*=-1;else{defectSortField=field;defectSortDir=1;}loadDefectsTable();});
+
+// ===================================================================
+// DEFECT DETAIL
+// ===================================================================
+function showDefectDetail(id){
+  const defects=dbGet('defects');const d=defects.find(x=>x.id===id);if(!d){showToast('Дефект не найден','error');return;}
+  const rolls=dbGet('rolls');const users=dbGet('users');const roll=rolls.find(r=>r.id===d.rollId);const user=users.find(u=>u.id===d.detectedBy);
+  document.getElementById('mdd-title').textContent='Дефект #'+d.id+' — '+d.defectType;
+  document.getElementById('mdd-body').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:8px"><span class="badge ${SEVERITY_BADGE[d.severity]}" style="font-size:12px;padding:5px 14px">${SEVERITY_MAP[d.severity]}</span><span class="badge ${STATUS_BADGE[d.status]}" style="font-size:12px;padding:5px 14px">${STATUS_MAP[d.status]}</span></div><div class="passport-grid" style="gap:14px;margin-bottom:18px"><div class="passport-field"><div class="pf-label">Тип дефекта</div><div class="pf-value" style="font-size:14px">${esc(d.defectType)}</div></div><div class="passport-field"><div class="pf-label">Рулон</div><div class="pf-value" style="font-size:14px"><a href="#" onclick="viewPassport(${d.rollId});closeModal('modal-defect-detail');return false;">${roll?roll.rollNumber:'—'}</a></div></div><div class="passport-field"><div class="pf-label">Дата обнаружения</div><div class="pf-value" style="font-size:14px">${fmtDateTime(d.detectedAt)}</div></div><div class="passport-field"><div class="pf-label">Обнаружил</div><div class="pf-value" style="font-size:14px">${user?user.fullName:'—'}</div></div><div class="passport-field"><div class="pf-label">Позиция</div><div class="pf-value" style="font-size:14px">${esc(d.position||'Не указана')}</div></div><div class="passport-field"><div class="pf-label">Агрегат</div><div class="pf-value" style="font-size:14px">${roll?roll.aggregateId:'—'}</div></div></div><div style="margin-bottom:18px"><label>Описание</label><p style="margin-top:5px;padding:10px 14px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);font-size:13px;line-height:1.6">${esc(d.description)}</p></div><div><label>История обработки</label><div style="margin-top:6px" id="defect-history-${d.id}"></div></div>`;
+  const evts=dbGet('events').filter(e=>e.relatedEntity==='defect'&&e.relatedId===d.id).sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
+  const histEl=document.getElementById('defect-history-'+d.id);
+  if(evts.length){histEl.innerHTML=evts.map(e=>{const eu=users.find(u=>u.id===e.userId);return'<div class="defect-history-item"><span class="dh-time">'+fmtDateTime(e.timestamp)+'</span><span class="badge '+LEVEL_BADGE[e.level]+'">'+LEVEL_MAP[e.level]+'</span><span style="flex:1">'+esc(e.message)+'</span><span style="color:var(--text-muted);font-size:12px">'+(eu?eu.fullName:'')+'</span></div>';}).join('');}
+  else{histEl.innerHTML='<p style="color:var(--text-muted);font-size:13px;padding:10px 0">Нет записей</p>';}
+  const footer=document.getElementById('mdd-footer');const s=getSession();const canEdit=s&&(s.role==='admin'||s.role==='technologist'||s.role==='otk');
+  let btns='<button class="btn-secondary" onclick="closeModal(\'modal-defect-detail\')">Закрыть</button>';
+  if(canEdit){if(d.status==='new')btns+=' <button class="btn-primary btn-icon" onclick="changeDefectStatus('+d.id+',\'inProgress\')">Взять в работу</button>';else if(d.status==='inProgress')btns+=' <button class="btn-success btn-icon" onclick="changeDefectStatus('+d.id+',\'resolved\')">Устранён</button>';else if(d.status==='resolved')btns+=' <button class="btn-primary btn-icon" onclick="changeDefectStatus('+d.id+',\'closed\')">Закрыть дефект</button>';}
+  footer.innerHTML=btns;openModal('modal-defect-detail');
+}
+function changeDefectStatus(id,newStatus){const defects=dbGet('defects');const d=defects.find(x=>x.id===id);if(!d)return;const oldStatus=d.status;d.status=newStatus;dbSet('defects',defects);logEvent('info','defect','Статус #'+d.id+': '+STATUS_MAP[oldStatus]+' -> '+STATUS_MAP[newStatus],'defect',d.id);showToast('Статус: '+STATUS_MAP[newStatus]);closeModal('modal-defect-detail');loadDefectsTable();loadDashboard();}
+
+// ===================================================================
+// REGISTER DEFECT
+// ===================================================================
+function openRegisterDefectModal(){const s=getSession();if(!s||(s.role!=='admin'&&s.role!=='technologist'&&s.role!=='otk')){showToast('Недостаточно прав','error');return;}['md-roll','md-position','md-desc'].forEach(id=>document.getElementById(id).value='');['md-type','md-severity'].forEach(id=>document.getElementById(id).value='');document.querySelectorAll('.field-error').forEach(el=>el.style.display='none');document.querySelectorAll('input.error,select.error,textarea.error').forEach(el=>el.classList.remove('error'));openModal('modal-defect');}
+function registerDefect(){let valid=true;const rollNum=document.getElementById('md-roll').value.trim();const type=document.getElementById('md-type').value;const severity=document.getElementById('md-severity').value;const desc=document.getElementById('md-desc').value.trim();const position=document.getElementById('md-position').value.trim();const rolls=dbGet('rolls');const roll=rolls.find(r=>r.rollNumber===rollNum);if(!roll){showFieldError('md-roll','md-roll-err');valid=false;}else hideFieldError('md-roll','md-roll-err');if(!type){showFieldError('md-type','md-type-err');valid=false;}else hideFieldError('md-type','md-type-err');if(!severity){showFieldError('md-severity','md-sev-err');valid=false;}else hideFieldError('md-severity','md-sev-err');if(!desc){showFieldError('md-desc','md-desc-err');valid=false;}else hideFieldError('md-desc','md-desc-err');if(!valid)return;const s=getSession();const defects=dbGet('defects');const nd={id:dbNextId('defects'),rollId:roll.id,defectType:type,severity,description:desc,detectedAt:new Date().toISOString(),detectedBy:s.id,position,photos:'[]',status:'new'};defects.push(nd);dbSet('defects',defects);logEvent(severity==='high'||severity==='critical'?'warning':'info','defect','Зарегистрирован: '+type+' на '+rollNum,'defect',nd.id);if(severity==='high'||severity==='critical'){const notifs=dbGet('notifications');notifs.push({id:dbNextId('notifications'),type:'alert',title:'Дефект высокой критичности',message:type+' на '+rollNum+' — '+SEVERITY_MAP[severity],createdAt:new Date().toISOString(),isRead:false,targetRole:'technologist',priority:severity==='critical'?1:2});dbSet('notifications',notifs);}const rollDefects=defects.filter(d=>d.rollId===roll.id);if(rollDefects.length>3){const notifs=dbGet('notifications');notifs.push({id:dbNextId('notifications'),type:'warning',title:'Множественные дефекты',message:rollNum+': '+rollDefects.length+' дефектов',createdAt:new Date().toISOString(),isRead:false,targetRole:'technologist',priority:2});dbSet('notifications',notifs);}closeModal('modal-defect');showToast('Дефект зарегистрирован');loadDefectsTable();}
+function onDefectRollSearch(val){const ac=document.getElementById('md-roll-ac');if(val.length<2){ac.style.display='none';return;}const rolls=dbGet('rolls');const m=rolls.filter(r=>r.rollNumber.toLowerCase().includes(val.toLowerCase())).slice(0,8);if(!m.length){ac.style.display='none';return;}ac.innerHTML=m.map(r=>'<div class="ac-item" onclick="document.getElementById(\'md-roll\').value=\''+r.rollNumber+'\';document.getElementById(\'md-roll-ac\').style.display=\'none\'">'+r.rollNumber+' — '+r.steelGrade+'</div>').join('');ac.style.display='block';}
+
+// ===================================================================
+// PASSPORT
+// ===================================================================
+let currentPassportRollId=null;
+function onPassportSearch(val){const ac=document.getElementById('passport-ac');if(val.length<2){ac.style.display='none';return;}const rolls=dbGet('rolls');const m=rolls.filter(r=>r.rollNumber.toLowerCase().includes(val.toLowerCase())).slice(0,8);if(!m.length){ac.style.display='none';return;}ac.innerHTML=m.map(r=>'<div class="ac-item" onclick="selectPassportRoll('+r.id+')">'+r.rollNumber+' — '+r.steelGrade+' ('+r.aggregateId+')</div>').join('');ac.style.display='block';}
+function selectPassportRoll(id){document.getElementById('passport-ac').style.display='none';viewPassport(id);}
+function viewPassport(rollId){
+  navigate('passport');const rolls=dbGet('rolls');const roll=rolls.find(r=>r.id===rollId);if(!roll){showToast('Рулон не найден','error');return;}currentPassportRollId=rollId;
+  document.getElementById('passport-search').value=roll.rollNumber;document.getElementById('passport-content').style.display='block';
+  document.getElementById('passport-status-badge').innerHTML='<span class="badge '+ROLL_STATUS_BADGE[roll.status]+'" style="font-size:12px;padding:5px 16px">'+ROLL_STATUS_MAP[roll.status]+'</span>';
+  document.getElementById('passport-info').innerHTML=[['Номер рулона',roll.rollNumber],['Марка стали',roll.steelGrade],['Дата производства',fmtDate(roll.productionDate)],['Агрегат',roll.aggregateId],['Смена / Бригада','Смена '+roll.shiftNumber+' / '+roll.brigade],['Толщина',roll.thickness+' мм'],['Ширина',roll.width+' мм'],['Масса',roll.weight+' т'],['Предел прочности',roll.tensileStrength+' МПа'],['Твёрдость',roll.hardness+' HRB']].map(([l,v])=>'<div class="passport-field"><div class="pf-label">'+l+'</div><div class="pf-value mono">'+esc(String(v))+'</div></div>').join('');
+  const defects=dbGet('defects').filter(d=>d.rollId===rollId).sort((a,b)=>new Date(b.detectedAt)-new Date(a.detectedAt));const defEl=document.getElementById('passport-defects');
+  if(!defects.length){defEl.innerHTML='<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg></div><p>Дефекты не зарегистрированы</p></div>';}
+  else{defEl.innerHTML='<div class="table-wrapper"><table><thead><tr><th>ID</th><th>Тип</th><th>Критичность</th><th>Статус</th><th>Позиция</th><th>Дата</th><th></th></tr></thead><tbody>'+defects.map(d=>'<tr><td class="mono">'+d.id+'</td><td>'+esc(d.defectType)+'</td><td><span class="badge '+SEVERITY_BADGE[d.severity]+'">'+SEVERITY_MAP[d.severity]+'</span></td><td><span class="badge '+STATUS_BADGE[d.status]+'">'+STATUS_MAP[d.status]+'</span></td><td>'+esc(d.position||'—')+'</td><td style="white-space:nowrap">'+fmtDateTime(d.detectedAt)+'</td><td><button class="btn-sm btn-secondary" onclick="showDefectDetail('+d.id+')">Подробнее</button></td></tr>').join('')+'</tbody></table></div>';}
+  const gallery=document.getElementById('passport-gallery');const dg=defects.slice(0,8);
+  if(dg.length){const colors=['#E74C3C','#F39C12','#3498DB','#27AE60','#9B59B6','#1ABC9C','#E67E22','#2C3E50'];gallery.innerHTML=dg.map((d,i)=>{const c=colors[i%colors.length];const svg='<svg xmlns="http://www.w3.org/2000/svg" width="280" height="210"><rect width="280" height="210" fill="'+c+'11"/><rect x="30" y="25" width="220" height="160" rx="8" fill="'+c+'22"/><circle cx="140" cy="90" r="30" fill="'+c+'33"/><text x="140" y="95" text-anchor="middle" fill="'+c+'" font-size="12" font-family="sans-serif" font-weight="600">'+esc(d.defectType)+'</text><text x="140" y="145" text-anchor="middle" fill="'+c+'99" font-size="10" font-family="sans-serif">ID: '+d.id+'</text></svg>';const uri='data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(svg)));return'<img src="'+uri+'" alt="'+esc(d.defectType)+'" onclick="openLightbox('+i+')" data-caption="Дефект #'+d.id+': '+esc(d.defectType)+'">';}).join('');}
+  else{gallery.innerHTML='<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg></div><p>Нет изображений</p></div>';}
+}
+
+// ===================================================================
+// LIGHTBOX
+// ===================================================================
+let lbImages=[],lbIdx=0;
+function openLightbox(idx){lbImages=Array.from(document.getElementById('passport-gallery').querySelectorAll('img')).map(img=>({src:img.src,caption:img.dataset.caption||''}));lbIdx=idx;updateLightbox();document.getElementById('lightbox').classList.add('open');}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('open');}
+function lbNav(dir){lbIdx=(lbIdx+dir+lbImages.length)%lbImages.length;updateLightbox();}
+function updateLightbox(){if(!lbImages.length)return;document.getElementById('lb-img').src=lbImages[lbIdx].src;document.getElementById('lb-caption').textContent=lbImages[lbIdx].caption+' ('+(lbIdx+1)+'/'+lbImages.length+')';}
+
+// ===================================================================
+// EVENTS
+// ===================================================================
+let eventPage=1;const eventPageSize=25;
+function getFilteredEvents(){let events=dbGet('events');const f={dateFrom:document.getElementById('ef-date-from').value,dateTo:document.getElementById('ef-date-to').value,level:document.getElementById('ef-level').value,type:document.getElementById('ef-type').value};if(f.dateFrom)events=events.filter(e=>e.timestamp>=f.dateFrom);if(f.dateTo)events=events.filter(e=>e.timestamp<=f.dateTo+'T23:59:59');if(f.level)events=events.filter(e=>e.level===f.level);if(f.type)events=events.filter(e=>e.eventType===f.type);return events.sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));}
+function loadEventsTable(){const users=dbGet('users');let events=getFilteredEvents();const total=events.length;const pages=Math.ceil(total/eventPageSize)||1;if(eventPage>pages)eventPage=pages;const start=(eventPage-1)*eventPageSize;const slice=events.slice(start,start+eventPageSize);document.getElementById('events-count-info').textContent='Записи '+(total?start+1:0)+' — '+Math.min(start+eventPageSize,total)+' из '+total;document.getElementById('events-tbody').innerHTML=slice.map(e=>{const u=users.find(x=>x.id===e.userId);return'<tr><td style="white-space:nowrap" class="mono">'+fmtDateTime(e.timestamp)+'</td><td><span class="badge '+LEVEL_BADGE[e.level]+'">'+LEVEL_MAP[e.level]+'</span></td><td>'+esc(e.eventType)+'</td><td style="max-width:280px">'+esc(e.message)+'</td><td>'+(u?esc(u.fullName):'Система')+'</td></tr>';}).join('');renderPagination('events-pagination',eventPage,pages,p=>{eventPage=p;loadEventsTable();});}
+function applyEventFilters(){eventPage=1;loadEventsTable();}
+function resetEventFilters(){['ef-date-from','ef-date-to'].forEach(id=>document.getElementById(id).value='');['ef-level','ef-type'].forEach(id=>document.getElementById(id).value='');eventPage=1;loadEventsTable();}
+
+// ===================================================================
+// ADMIN
+// ===================================================================
+function loadUsersTable(){const users=dbGet('users');document.getElementById('users-count-info').textContent='Пользователи: '+users.length;document.getElementById('users-tbody').innerHTML=users.map(u=>'<tr><td class="mono">'+u.id+'</td><td><strong>'+esc(u.username)+'</strong></td><td>'+esc(u.fullName)+'</td><td><span class="badge badge-blue">'+ROLE_MAP[u.role]+'</span></td><td>'+esc(u.department||'—')+'</td><td><span class="badge '+(u.isActive?'badge-green':'badge-gray')+'">'+(u.isActive?'Активен':'Заблокирован')+'</span></td><td style="white-space:nowrap">'+(u.lastLogin?fmtDateTime(u.lastLogin):'—')+'</td><td style="white-space:nowrap"><button class="btn-xs btn-secondary" onclick="editUser('+u.id+')">Изменить</button> <button class="btn-xs '+(u.isActive?'btn-danger':'btn-success')+'" onclick="toggleUserActive('+u.id+')">'+(u.isActive?'Блок.':'Разбл.')+'</button>'+(u.id!==1?' <button class="btn-xs btn-danger" onclick="confirmDeleteUser('+u.id+')">Удалить</button>':'')+'</td></tr>').join('');}
+function openUserModal(editId){document.getElementById('mu-id').value=editId||'';document.getElementById('mu-title').textContent=editId?'Редактировать':'Добавить пользователя';document.querySelectorAll('.field-error').forEach(el=>el.style.display='none');document.querySelectorAll('input.error,select.error').forEach(el=>el.classList.remove('error'));if(editId){const u=dbGet('users').find(x=>x.id===editId);if(u){document.getElementById('mu-username').value=u.username;document.getElementById('mu-password').value='';document.getElementById('mu-fullname').value=u.fullName;document.getElementById('mu-dept').value=u.department||'';document.getElementById('mu-role').value=u.role;}}else{['mu-username','mu-password','mu-fullname','mu-dept'].forEach(id=>document.getElementById(id).value='');document.getElementById('mu-role').value='';}openModal('modal-user');}
+function editUser(id){openUserModal(id);}
+function saveUser(){const editId=document.getElementById('mu-id').value;const username=document.getElementById('mu-username').value.trim();const password=document.getElementById('mu-password').value;const fullName=document.getElementById('mu-fullname').value.trim();const dept=document.getElementById('mu-dept').value.trim();const role=document.getElementById('mu-role').value;let valid=true;const users=dbGet('users');if(!username||((!editId||users.find(u=>u.id===+editId)?.username!==username)&&users.find(u=>u.username===username))){showFieldError('mu-username','mu-user-err');valid=false;}else hideFieldError('mu-username','mu-user-err');if(!editId&&(!password||password.length<8||!/\d/.test(password)||!/[a-zA-Za-яА-Я]/.test(password))){showFieldError('mu-password','mu-pass-err');valid=false;}else if(editId&&password&&(password.length<8||!/\d/.test(password)||!/[a-zA-Za-яА-Я]/.test(password))){showFieldError('mu-password','mu-pass-err');valid=false;}else hideFieldError('mu-password','mu-pass-err');if(!fullName||!role){showToast('Заполните все поля','error');return;}if(!valid)return;if(editId){const u=users.find(x=>x.id===+editId);if(u){u.username=username;u.fullName=fullName;u.department=dept;u.role=role;if(password)u.password=simpleHash(password);dbSet('users',users);logEvent('info','admin','Обновлена УЗ: '+username,'user',u.id);showToast('Обновлено');}}else{const nu={id:dbNextId('users'),username,password:simpleHash(password),role,fullName,department:dept,isActive:true,lastLogin:null};users.push(nu);dbSet('users',users);logEvent('info','admin','Создана УЗ: '+username,'user',nu.id);showToast('Пользователь создан');}closeModal('modal-user');loadUsersTable();}
+function toggleUserActive(id){const users=dbGet('users');const u=users.find(x=>x.id===id);if(!u)return;u.isActive=!u.isActive;dbSet('users',users);logEvent('info','admin',(u.isActive?'Разблокирована':'Заблокирована')+' УЗ: '+u.username,'user',u.id);showToast(u.isActive?'Разблокирован':'Заблокирован');loadUsersTable();}
+function confirmDeleteUser(id){const u=dbGet('users').find(x=>x.id===id);if(!u)return;document.getElementById('confirm-msg').textContent='Удалить «'+u.username+'» ('+u.fullName+')?';document.getElementById('confirm-btn').onclick=()=>{dbSet('users',dbGet('users').filter(x=>x.id!==id));logEvent('info','admin','Удалена УЗ: '+u.username,'user',id);showToast('Удалён');closeModal('modal-confirm');loadUsersTable();};openModal('modal-confirm');}
+
+// ===================================================================
+// EXPORT
+// ===================================================================
+function downloadFile(content,filename,type){const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url);}
+function exportDefectsCSV(){const defects=getFilteredDefects();const rolls=dbGet('rolls');const users=dbGet('users');let csv='\uFEFFID;Рулон;Тип;Критичность;Статус;Дата;Обнаружил;Позиция;Описание\n';defects.forEach(d=>{const r=rolls.find(x=>x.id===d.rollId);const u=users.find(x=>x.id===d.detectedBy);csv+=[d.id,r?r.rollNumber:'',d.defectType,SEVERITY_MAP[d.severity],STATUS_MAP[d.status],fmtDateTime(d.detectedAt),u?u.fullName:'',d.position||'','"'+d.description.replace(/"/g,'""')+'"'].join(';')+'\n';});downloadFile(csv,'defects_'+fmtDateFile()+'.csv','text/csv;charset=utf-8');logEvent('info','export','CSV дефектов ('+defects.length+')');showToast('CSV экспортирован');}
+function exportEventsCSV(){const events=getFilteredEvents();const users=dbGet('users');let csv='\uFEFFВремя;Уровень;Тип;Описание;Пользователь\n';events.forEach(e=>{const u=users.find(x=>x.id===e.userId);csv+=[fmtDateTime(e.timestamp),LEVEL_MAP[e.level],e.eventType,'"'+e.message.replace(/"/g,'""')+'"',u?u.fullName:'Система'].join(';')+'\n';});downloadFile(csv,'events_'+fmtDateFile()+'.csv','text/csv;charset=utf-8');logEvent('info','export','CSV журнала ('+events.length+')');showToast('CSV экспортирован');}
+function exportDefectsPDF(){const{jsPDF}=window.jspdf;const doc=new jsPDF('l','mm','a4');doc.setFont('helvetica','bold');doc.setFontSize(14);doc.text('PAO NLMK — Defects Report',14,18);doc.setFont('helvetica','normal');doc.setFontSize(9);doc.text('Date: '+fmtDateTime(new Date().toISOString()),14,25);const defects=getFilteredDefects();const rolls=dbGet('rolls');const users=dbGet('users');const rows=defects.map(d=>{const r=rolls.find(x=>x.id===d.rollId);const u=users.find(x=>x.id===d.detectedBy);return[d.id,r?r.rollNumber:'',d.defectType,SEVERITY_MAP[d.severity],STATUS_MAP[d.status],fmtDateTime(d.detectedAt),u?u.fullName:'',d.position||''];});doc.autoTable({startY:30,head:[['ID','Roll','Type','Severity','Status','Date','By','Position']],body:rows,styles:{fontSize:8,cellPadding:2},headStyles:{fillColor:[30,37,56]},alternateRowStyles:{fillColor:[240,240,240]}});doc.save('defects_'+fmtDateFile()+'.pdf');logEvent('info','export','PDF дефектов');showToast('PDF сформирован');}
+function exportEventsPDF(){const{jsPDF}=window.jspdf;const doc=new jsPDF('l','mm','a4');doc.setFont('helvetica','bold');doc.setFontSize(14);doc.text('PAO NLMK — Events Log',14,18);doc.setFont('helvetica','normal');doc.setFontSize(9);doc.text('Date: '+fmtDateTime(new Date().toISOString()),14,25);const events=getFilteredEvents();const users=dbGet('users');const rows=events.map(e=>{const u=users.find(x=>x.id===e.userId);return[fmtDateTime(e.timestamp),LEVEL_MAP[e.level],e.eventType,e.message,u?u.fullName:'System'];});doc.autoTable({startY:30,head:[['Time','Level','Type','Description','User']],body:rows,styles:{fontSize:8,cellPadding:2},headStyles:{fillColor:[30,37,56]},alternateRowStyles:{fillColor:[240,240,240]}});doc.save('events_'+fmtDateFile()+'.pdf');showToast('PDF сформирован');}
+function exportPassportPDF(){if(!currentPassportRollId)return;const{jsPDF}=window.jspdf;const doc=new jsPDF('p','mm','a4');const rolls=dbGet('rolls');const roll=rolls.find(r=>r.id===currentPassportRollId);if(!roll)return;doc.setFont('helvetica','bold');doc.setFontSize(16);doc.text('PAO NLMK',105,20,{align:'center'});doc.setFontSize(12);doc.text('ROLL QUALITY PASSPORT',105,28,{align:'center'});doc.setFont('helvetica','normal');doc.setFontSize(9);doc.text('Date: '+fmtDateTime(new Date().toISOString()),105,35,{align:'center'});const info=[['Roll Number',roll.rollNumber],['Steel Grade',roll.steelGrade],['Production Date',fmtDate(roll.productionDate)],['Aggregate',roll.aggregateId],['Shift/Brigade','Shift '+roll.shiftNumber+' / '+roll.brigade],['Thickness',roll.thickness+' mm'],['Width',roll.width+' mm'],['Weight',roll.weight+' t'],['Tensile Strength',roll.tensileStrength+' MPa'],['Hardness',roll.hardness+' HRB'],['Status',ROLL_STATUS_MAP[roll.status]]];doc.autoTable({startY:42,body:info,styles:{fontSize:10,cellPadding:3},columnStyles:{0:{fontStyle:'bold',cellWidth:60}},theme:'grid'});const defects=dbGet('defects').filter(d=>d.rollId===currentPassportRollId);if(defects.length){doc.setFont('helvetica','bold');doc.setFontSize(11);doc.text('Defects ('+defects.length+')',14,doc.lastAutoTable.finalY+12);const dRows=defects.map(d=>[d.id,d.defectType,SEVERITY_MAP[d.severity],STATUS_MAP[d.status],d.position||'—',fmtDateTime(d.detectedAt)]);doc.autoTable({startY:doc.lastAutoTable.finalY+16,head:[['ID','Type','Severity','Status','Position','Date']],body:dRows,styles:{fontSize:8,cellPadding:2},headStyles:{fillColor:[30,37,56]},alternateRowStyles:{fillColor:[240,240,240]}});}doc.save('passport_'+roll.rollNumber+'_'+fmtDateFile()+'.pdf');logEvent('info','export','PDF паспорта '+roll.rollNumber);showToast('PDF экспортирован');}
+function exportUsersPDF(){const{jsPDF}=window.jspdf;const doc=new jsPDF('l','mm','a4');doc.setFont('helvetica','bold');doc.setFontSize(14);doc.text('PAO NLMK — Users',14,18);doc.setFont('helvetica','normal');doc.setFontSize(9);doc.text('Date: '+fmtDateTime(new Date().toISOString()),14,25);const users=dbGet('users');const rows=users.map(u=>[u.id,u.username,u.fullName,ROLE_MAP[u.role],u.department||'—',u.isActive?'Active':'Blocked',u.lastLogin?fmtDateTime(u.lastLogin):'—']);doc.autoTable({startY:30,head:[['ID','Login','Name','Role','Department','Status','Last Login']],body:rows,styles:{fontSize:9,cellPadding:2},headStyles:{fillColor:[30,37,56]},alternateRowStyles:{fillColor:[240,240,240]}});doc.save('users_'+fmtDateFile()+'.pdf');showToast('PDF экспортирован');}
+
+// ===================================================================
+// SETTINGS FUNCTIONS
+// ===================================================================
+function loadDBInfo(){
+  const tables=[{key:'users',label:'Пользователи'},{key:'rolls',label:'Рулоны'},{key:'defects',label:'Дефекты'},{key:'events',label:'События'},{key:'lineStatus',label:'Статус линии'},{key:'notifications',label:'Уведомления'}];
+  document.getElementById('db-info').innerHTML=tables.map(t=>{const d=dbGet(t.key);return'<div class="db-info-item"><div class="db-num">'+d.length+'</div><div class="db-label">'+t.label+'</div></div>';}).join('');
+}
+function exportAllData(){
+  const data={users:dbGet('users'),rolls:dbGet('rolls'),defects:dbGet('defects'),events:dbGet('events'),lineStatus:dbGet('lineStatus'),notifications:dbGet('notifications')};
+  downloadFile(JSON.stringify(data,null,2),'skk_nlmk_backup_'+fmtDateFile()+'.json','application/json');showToast('Данные экспортированы');logEvent('info','export','Экспорт всех данных');
+}
+function confirmResetDB(){
+  document.getElementById('confirm-msg').textContent='Сбросить все данные к начальным значениям? Текущие данные будут удалены.';
+  document.getElementById('confirm-btn').onclick=()=>{localStorage.removeItem('_seeded_v4');const settings=localStorage.getItem('appSettings');localStorage.clear();if(settings)localStorage.setItem('appSettings',settings);seedDatabase();closeModal('modal-confirm');showToast('База данных сброшена');navigate('settings');};
+  openModal('modal-confirm');
+}
+
+// ===================================================================
+// PAGINATION
+// ===================================================================
+function renderPagination(cId,current,total,onPage){const c=document.getElementById(cId);if(total<=1){c.innerHTML='';return;}let h='<button '+(current<=1?'disabled':'')+' class="pg-first">&#171;</button><button '+(current<=1?'disabled':'')+' class="pg-prev">&#8249;</button>';let s=Math.max(1,current-2),e=Math.min(total,current+2);if(current<=3)e=Math.min(total,5);if(current>=total-2)s=Math.max(1,total-4);for(let i=s;i<=e;i++)h+='<button class="'+(i===current?'active':'')+'" data-p="'+i+'">'+i+'</button>';h+='<button '+(current>=total?'disabled':'')+' class="pg-next">&#8250;</button><button '+(current>=total?'disabled':'')+' class="pg-last">&#187;</button><span class="page-info">'+current+' / '+total+'</span>';c.innerHTML=h;c.querySelectorAll('button[data-p]').forEach(btn=>btn.addEventListener('click',()=>onPage(+btn.dataset.p)));c.querySelector('.pg-first')?.addEventListener('click',()=>onPage(1));c.querySelector('.pg-prev')?.addEventListener('click',()=>onPage(Math.max(1,current-1)));c.querySelector('.pg-next')?.addEventListener('click',()=>onPage(Math.min(total,current+1)));c.querySelector('.pg-last')?.addEventListener('click',()=>onPage(total));}
+function populateDefectTypeSelects(){[document.getElementById('f-defect-type'),document.getElementById('md-type')].forEach(sel=>{if(!sel)return;const cur=sel.value;const first=sel.querySelector('option:first-child');sel.innerHTML='';sel.appendChild(first);DEFECT_TYPES.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;sel.appendChild(o);});sel.value=cur;});}
+
+// ===================================================================
+// LINE STATUS SIMULATION
+// ===================================================================
+let _simTick=0;
+function simulateLineStatus(){
+  const ls=dbGet('lineStatus');const rolls=dbGet('rolls');if(!ls.length||!rolls.length)return;
+  const last=ls[ls.length-1];_simTick++;
+  last.lineSpeed=Math.max(50,Math.min(250,last.lineSpeed+(Math.random()-.5)*14));
+  last.lineSpeed=+last.lineSpeed.toFixed(1);
+  last.temperature=Math.max(580,Math.min(750,last.temperature+(Math.random()-.5)*7));
+  last.temperature=+last.temperature.toFixed(1);
+  last.timestamp=new Date().toISOString();
+  if(Math.random()<0.08)last.currentRollId=rolls[Math.floor(Math.random()*rolls.length)].id;
+  if(Math.random()<0.03){
+    const sts=['running','running','running','stopped','maintenance','error'];
+    const ns=sts[Math.floor(Math.random()*sts.length)];
+    if(ns!==last.equipmentStatus){
+      const old=last.equipmentStatus;last.equipmentStatus=ns;
+      if(ns==='error')generateAutoNotification('alert','Сбой оборудования','Обнаружена ошибка в работе оборудования — требуется диагностика',1);
+      else if(ns==='stopped')generateAutoNotification('warning','Остановка линии','Производственная линия остановлена — ожидание команды оператора',2);
+      else if(old!=='running'&&ns==='running')generateAutoNotification('info','Линия запущена','Производственная линия возобновила работу в штатном режиме',3);
+    }
+  }
+  dbSet('lineStatus',ls);
+  if(_simTick%3===0&&Math.random()<0.3)generateRandomNotification();
+  const isDash=document.getElementById('page-dashboard').classList.contains('active');
+  if(isDash){
+    document.getElementById('ls-speed').textContent=last.lineSpeed+' м/мин';
+    document.getElementById('ls-temp').textContent=last.temperature+' °C';
+    const roll=rolls.find(r=>r.id===last.currentRollId);
+    if(roll)document.getElementById('ls-roll').textContent=roll.rollNumber;
+    document.getElementById('line-status-panel').className='card status-panel status-'+last.equipmentStatus;
+    const ic={running:'indicator-green',stopped:'indicator-yellow',maintenance:'indicator-yellow',error:'indicator-red'}[last.equipmentStatus]||'indicator-green';
+    document.getElementById('ls-equip').innerHTML='<span class="status-indicator '+ic+'"></span> '+(EQUIP_STATUS_MAP[last.equipmentStatus]||last.equipmentStatus);
+    const nc=dbGet('notifications').filter(n=>!n.isRead).length;
+    document.getElementById('alerts-count').textContent=nc;
+  }
+}
+
+// ===================================================================
+// INIT
+// ===================================================================
+loadSettings();
+seedDatabase();
+defectPageSize=appSettings.pageSize;
+const existingSession=getSession();
+if(existingSession){showApp();}else{document.getElementById('login-page').style.display='flex';}
+let lineInterval=setInterval(simulateLineStatus,appSettings.refreshInterval);
+document.addEventListener('click',e=>{if(!e.target.closest('.search-big')&&!e.target.closest('.form-group'))document.querySelectorAll('.autocomplete-list').forEach(el=>el.style.display='none');});
+document.querySelectorAll('.print-now').forEach(el=>el.textContent=fmtDateTime(new Date().toISOString()));
+
+// ===================================================================
+// AUTO-NOTIFICATION GENERATOR
+// ===================================================================
+function generateAutoNotification(type,title,message,priority){
+  const notifs=dbGet('notifications');
+  notifs.push({id:dbNextId('notifications'),type:type,title:title,message:message,createdAt:new Date().toISOString(),isRead:false,targetRole:'technologist',priority:priority});
+  dbSet('notifications',notifs);
+  if(document.getElementById('page-dashboard').classList.contains('active'))loadDashboard();
+  if(type==='alert')showToast(title,'error');
+  else if(type==='warning')showToast(title,'warning');
+}
+function generateRandomNotification(){
+  const rolls=dbGet('rolls');if(!rolls.length)return;
+  const roll=rolls[Math.floor(Math.random()*rolls.length)];
+  const tpls=[
+    {type:'warning',title:'Отклонение толщины',message:'Рулон '+roll.rollNumber+' — отклонение от номинала на 0.'+Math.floor(Math.random()*9+1)+'мм',priority:2},
+    {type:'alert',title:'Обнаружен критический дефект',message:'Автоматическая система зафиксировала дефект на рулоне '+roll.rollNumber,priority:1},
+    {type:'warning',title:'Превышение скорости линии',message:'Скорость линии превышает рекомендованную для марки '+roll.steelGrade,priority:2},
+    {type:'info',title:'Рулон передан на контроль',message:'Обработка рулона '+roll.rollNumber+' завершена, передан на контроль ОТК',priority:3},
+    {type:'warning',title:'Температурное отклонение',message:'Температура на агрегате '+roll.aggregateId+' вышла за допустимый диапазон',priority:2},
+    {type:'alert',title:'Множественные дефекты',message:'На рулоне '+roll.rollNumber+' зарегистрировано более 3 дефектов подряд',priority:1},
+    {type:'info',title:'Результаты лаборатории',message:'Получены результаты испытаний для '+roll.rollNumber+' — соответствует нормам',priority:3},
+    {type:'warning',title:'Износ инструмента',message:'Ресурс валков на '+roll.aggregateId+' исчерпан на '+Math.floor(Math.random()*20+80)+'%',priority:2},
+    {type:'info',title:'Обновление статуса',message:'Рулон '+roll.rollNumber+' переведён в статус проверки ОТК',priority:3},
+    {type:'warning',title:'Повышенная вибрация',message:'Зафиксирована повышенная вибрация подшипника на '+roll.aggregateId,priority:2},
+    {type:'alert',title:'Несоответствие ширины',message:'Ширина '+roll.rollNumber+' отклоняется от заданной на '+Math.floor(Math.random()*5+1)+'мм',priority:1},
+    {type:'info',title:'Смена оператора',message:'Оператор на '+roll.aggregateId+' произвёл пересменку, журнал передан',priority:3},
+    {type:'warning',title:'Низкое давление эмульсии',message:'Давление СОЖ на '+roll.aggregateId+' ниже нормы — проверьте насосную станцию',priority:2},
+    {type:'alert',title:'Обрыв полосы',message:'Зафиксирован обрыв полосы на '+roll.aggregateId+' — экстренная остановка',priority:1},
+    {type:'warning',title:'Неравномерность обжатия',message:'Неравномерное обжатие на '+roll.aggregateId+' — проверьте настройку зазора',priority:2},
+    {type:'info',title:'Партия отгружена',message:'Партия рулонов ('+roll.steelGrade+') прошла финальный контроль и отгружена',priority:3}
+  ];
+  const t=tpls[Math.floor(Math.random()*tpls.length)];
+  generateAutoNotification(t.type,t.title,t.message,t.priority);
+}
+
+// ===================================================================
+// CYRILLIC PDF FONT SUPPORT
+// ===================================================================
+let _cyrFont=null;
+async function loadCyrillicFont(){
+  if(_cyrFont)return _cyrFont;
+  try{
+    const r=await fetch('https://cdn.jsdelivr.net/npm/roboto-fontface@0.10.0/fonts/roboto/Roboto-Regular.ttf');
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const buf=await r.arrayBuffer();
+    let bin='';const bytes=new Uint8Array(buf);
+    for(let i=0;i<bytes.length;i++)bin+=String.fromCharCode(bytes[i]);
+    _cyrFont=btoa(bin);return _cyrFont;
+  }catch(e){console.warn('Cyrillic font load:',e);return null;}
+}
+async function createPdfDoc(orient){
+  const{jsPDF}=window.jspdf;const doc=new jsPDF(orient||'p','mm','a4');
+  let fn='helvetica';
+  const fd=await loadCyrillicFont();
+  if(fd){
+    doc.addFileToVFS('Roboto.ttf',fd);
+    doc.addFont('Roboto.ttf','Roboto','normal');
+    doc.addFont('Roboto.ttf','Roboto','bold');
+    doc.setFont('Roboto','normal');fn='Roboto';
+  }
+  return{doc,fn};
+}
+loadCyrillicFont();
+
+// Override PDF exports with Cyrillic support
+exportDefectsPDF=async function(){
+  showToast('Формирование PDF...','info');
+  const{doc,fn}=await createPdfDoc('l');
+  doc.setFontSize(14);doc.text('ПАО «НЛМК» — Отчёт по дефектам',14,18);
+  doc.setFontSize(9);doc.text('Дата формирования: '+fmtDateTime(new Date().toISOString()),14,25);
+  const s=getSession();if(s)doc.text('Сформировал: '+s.fullName,14,30);
+  const defects=getFilteredDefects();const rolls=dbGet('rolls');const users=dbGet('users');
+  const rows=defects.map(d=>{const r=rolls.find(x=>x.id===d.rollId);const u=users.find(x=>x.id===d.detectedBy);return[d.id,r?r.rollNumber:'',d.defectType,SEVERITY_MAP[d.severity],STATUS_MAP[d.status],fmtDateTime(d.detectedAt),u?u.fullName:'',d.position||''];});
+  doc.autoTable({startY:s?35:30,head:[['ID','Рулон','Тип дефекта','Критичность','Статус','Дата','Обнаружил','Позиция']],body:rows,styles:{fontSize:8,cellPadding:2,font:fn},headStyles:{fillColor:[30,37,56],fontStyle:'normal'},alternateRowStyles:{fillColor:[240,240,240]}});
+  doc.save('defects_'+fmtDateFile()+'.pdf');logEvent('info','export','PDF дефектов');showToast('PDF сформирован');
+};
+exportEventsPDF=async function(){
+  showToast('Формирование PDF...','info');
+  const{doc,fn}=await createPdfDoc('l');
+  doc.setFontSize(14);doc.text('ПАО «НЛМК» — Журнал событий',14,18);
+  doc.setFontSize(9);doc.text('Дата формирования: '+fmtDateTime(new Date().toISOString()),14,25);
+  const events=getFilteredEvents();const users=dbGet('users');
+  const rows=events.map(e=>{const u=users.find(x=>x.id===e.userId);return[fmtDateTime(e.timestamp),LEVEL_MAP[e.level],e.eventType,e.message,u?u.fullName:'Система'];});
+  doc.autoTable({startY:30,head:[['Время','Уровень','Тип','Описание','Пользователь']],body:rows,styles:{fontSize:8,cellPadding:2,font:fn},headStyles:{fillColor:[30,37,56],fontStyle:'normal'},alternateRowStyles:{fillColor:[240,240,240]}});
+  doc.save('events_'+fmtDateFile()+'.pdf');showToast('PDF сформирован');
+};
+exportPassportPDF=async function(){
+  if(!currentPassportRollId)return;
+  showToast('Формирование PDF...','info');
+  const{doc,fn}=await createPdfDoc('p');
+  const rolls=dbGet('rolls');const roll=rolls.find(r=>r.id===currentPassportRollId);if(!roll)return;
+  doc.setFontSize(16);doc.text('ПАО «НЛМК»',105,20,{align:'center'});
+  doc.setFontSize(12);doc.text('ПАСПОРТ КАЧЕСТВА РУЛОНА',105,28,{align:'center'});
+  doc.setFontSize(9);doc.text('Дата формирования: '+fmtDateTime(new Date().toISOString()),105,35,{align:'center'});
+  const info=[['Номер рулона',roll.rollNumber],['Марка стали',roll.steelGrade],['Дата производства',fmtDate(roll.productionDate)],['Агрегат',roll.aggregateId],['Смена / Бригада','Смена '+roll.shiftNumber+' / '+roll.brigade],['Толщина',roll.thickness+' мм'],['Ширина',roll.width+' мм'],['Масса',roll.weight+' т'],['Предел прочности',roll.tensileStrength+' МПа'],['Твёрдость',roll.hardness+' HRB'],['Статус',ROLL_STATUS_MAP[roll.status]]];
+  doc.autoTable({startY:42,body:info,styles:{fontSize:10,cellPadding:3,font:fn},columnStyles:{0:{fontStyle:'normal',cellWidth:60}},theme:'grid'});
+  const defects=dbGet('defects').filter(d=>d.rollId===currentPassportRollId);
+  if(defects.length){
+    doc.setFontSize(11);doc.text('Дефекты ('+defects.length+')',14,doc.lastAutoTable.finalY+12);
+    const dRows=defects.map(d=>[d.id,d.defectType,SEVERITY_MAP[d.severity],STATUS_MAP[d.status],d.position||'—',fmtDateTime(d.detectedAt)]);
+    doc.autoTable({startY:doc.lastAutoTable.finalY+16,head:[['ID','Тип дефекта','Критичность','Статус','Позиция','Дата']],body:dRows,styles:{fontSize:8,cellPadding:2,font:fn},headStyles:{fillColor:[30,37,56],fontStyle:'normal'},alternateRowStyles:{fillColor:[240,240,240]}});
+  }
+  doc.save('passport_'+roll.rollNumber+'_'+fmtDateFile()+'.pdf');logEvent('info','export','PDF паспорта '+roll.rollNumber);showToast('PDF экспортирован');
+};
+exportUsersPDF=async function(){
+  showToast('Формирование PDF...','info');
+  const{doc,fn}=await createPdfDoc('l');
+  doc.setFontSize(14);doc.text('ПАО «НЛМК» — Список пользователей',14,18);
+  doc.setFontSize(9);doc.text('Дата формирования: '+fmtDateTime(new Date().toISOString()),14,25);
+  const users=dbGet('users');
+  const rows=users.map(u=>[u.id,u.username,u.fullName,ROLE_MAP[u.role],u.department||'—',u.isActive?'Активен':'Заблокирован',u.lastLogin?fmtDateTime(u.lastLogin):'—']);
+  doc.autoTable({startY:30,head:[['ID','Логин','ФИО','Роль','Подразделение','Статус','Последний вход']],body:rows,styles:{fontSize:9,cellPadding:2,font:fn},headStyles:{fillColor:[30,37,56],fontStyle:'normal'},alternateRowStyles:{fillColor:[240,240,240]}});
+  doc.save('users_'+fmtDateFile()+'.pdf');showToast('PDF экспортирован');
+};
+</script>
+</body>
+</html>
