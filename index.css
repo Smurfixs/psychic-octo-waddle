@@ -1,1 +1,149 @@
 @import "tailwindcss";
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f1f5f9;
+    color: #1e293b;
+    min-height: 100vh;
+  }
+  #root {
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 cursor-pointer text-sm inline-flex items-center gap-2;
+  }
+  .btn-primary {
+    @apply bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800;
+  }
+  .btn-success {
+    @apply bg-emerald-600 text-white hover:bg-emerald-700;
+  }
+  .btn-danger {
+    @apply bg-red-600 text-white hover:bg-red-700;
+  }
+  .btn-warning {
+    @apply bg-amber-500 text-white hover:bg-amber-600;
+  }
+  .btn-secondary {
+    @apply bg-slate-200 text-slate-700 hover:bg-slate-300;
+  }
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-slate-200 p-6;
+  }
+
+  .input {
+    @apply w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white;
+  }
+
+  .select {
+    @apply w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white appearance-none;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-slate-600 mb-1;
+  }
+
+  .table-container {
+    @apply overflow-x-auto rounded-lg border border-slate-200;
+  }
+
+  .data-table {
+    @apply w-full text-sm;
+  }
+  .data-table thead {
+    @apply bg-slate-50;
+  }
+  .data-table th {
+    @apply px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200;
+  }
+  .data-table td {
+    @apply px-4 py-3 border-b border-slate-100 text-slate-700;
+  }
+  .data-table tbody tr:hover {
+    @apply bg-blue-50/50;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  .badge-critical {
+    @apply bg-red-100 text-red-800;
+  }
+  .badge-major {
+    @apply bg-amber-100 text-amber-800;
+  }
+  .badge-minor {
+    @apply bg-blue-100 text-blue-800;
+  }
+  .badge-open {
+    @apply bg-red-100 text-red-700;
+  }
+  .badge-in-progress {
+    @apply bg-amber-100 text-amber-700;
+  }
+  .badge-resolved {
+    @apply bg-emerald-100 text-emerald-700;
+  }
+
+  .stat-card {
+    @apply bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col;
+  }
+
+  .sidebar-link {
+    @apply flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition-colors duration-200 text-sm font-medium cursor-pointer;
+  }
+  .sidebar-link.active {
+    @apply bg-blue-600 text-white shadow-lg shadow-blue-600/30;
+  }
+
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4;
+  }
+  .modal-content {
+    @apply bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto;
+  }
+
+  .report-window {
+    @apply fixed inset-0 bg-white z-50 overflow-y-auto;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white;
+  }
+  .report-print {
+    padding: 20px;
+  }
+  .report-print table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  .report-print th,
+  .report-print td {
+    border: 1px solid #333;
+    padding: 6px 10px;
+    text-align: left;
+    font-size: 11px;
+  }
+  .report-print th {
+    background-color: #e2e8f0;
+    font-weight: bold;
+  }
+}
